@@ -4,11 +4,12 @@
 //   - aluno lê e grava só os próprios registros;
 //   - mentor lê os registros dos alunos dele e grava só as notas de mentoria.
 
-import { uid, today } from './util.js?v=202611162315';
-import { buildSeed } from './seed.js?v=202611162315';
-import { MODULES_SEED, WATCHED_SEED } from './content.js?v=202611162315';
+import { uid, today } from './util.js?v=202611162334';
+import { buildSeed } from './seed.js?v=202611162334';
+import { MODULES_SEED, WATCHED_SEED } from './content.js?v=202611162334';
+import { defaultTemplate } from './timeline.js?v=202611162334';
 
-const KEY = 'dm2-plataforma-v3';
+const KEY = 'dm2-plataforma-v4';
 const VIEWAS = 'dm2-viewas';
 const SESSION = 'dm2-session';
 const STUDENT_TABLES = ['blocks', 'anki', 'mistakes', 'assessments'];
@@ -26,6 +27,9 @@ function load() {
 function withContent(d) {
   if (!d.modules) d.modules = JSON.parse(JSON.stringify(MODULES_SEED));
   if (!d.watched) d.watched = JSON.parse(JSON.stringify(WATCHED_SEED));
+  if (!d.tlTemplate) d.tlTemplate = defaultTemplate();
+  if (!d.tlDone) d.tlDone = { ana: ['wdoms', 'intealth', 'traducao', 'video'], carla: ['wdoms', 'intealth'], diego: ['wdoms', 'intealth', 'traducao', 'video', 'credenciais', 'fsmb', 'prometric'] };
+  if (!d.tlOverrides) d.tlOverrides = {};
   for (const u of d.users) if (u.role === 'student' && !u.email) u.email = `${u.id}@exemplo.com`;
   return d;
 }
@@ -102,6 +106,27 @@ export const store = {
     db.modules.push({ id: uid(), title: 'Novo módulo', lessons: [] }); save();
   },
   watched(studentId) { return db.watched[studentId] || []; },
+
+  // Timeline: modelo da mentoria, itens feitos e datas ajustadas por aluno.
+  tlTemplate() { return db.tlTemplate; },
+  saveTlTemplateItem(id, patch) {
+    if (!this.isAdmin()) throw new AccessDenied();
+    const it = db.tlTemplate.find((x) => x.id === id); if (it) Object.assign(it, patch); save();
+  },
+  tlState(studentId) { return { done: db.tlDone[studentId] || [], overrides: db.tlOverrides[studentId] || {} }; },
+  toggleTlDone(itemId) {
+    const me = this.me();
+    if (!me || me.role !== 'student') throw new AccessDenied();
+    const l = db.tlDone[me.id] || (db.tlDone[me.id] = []);
+    const i = l.indexOf(itemId); if (i < 0) l.push(itemId); else l.splice(i, 1);
+    save();
+  },
+  setTlOverride(studentId, itemId, isoDate) {
+    if (!this.isAdmin()) throw new AccessDenied();
+    const o = db.tlOverrides[studentId] || (db.tlOverrides[studentId] = {});
+    if (isoDate) o[itemId] = isoDate; else delete o[itemId];
+    save();
+  },
   toggleWatched(lessonId) {
     const me = this.me();
     if (!me || me.role !== 'student') throw new AccessDenied();

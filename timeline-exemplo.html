@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeline DM2 · exemplo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Timeline com zoom: faixas (fases, marcos, processo, simulados, mentoria), régua que muda de unidade,
+   "você está em", minimapa e painel de detalhe. Mesmas cores do protótipo. */
+:root {
+  --bg: #f5f3ec; --surface: #fff; --surface-2: #faf8f2; --ink: #14211c; --ink-2: #4a5751; --ink-3: #7f8a85;
+  --line: #e5e1d6; --line-2: #d6d1c3; --brand: #0f3d2e; --gold: #a8801f; --gold-mark: #c9a03a; --gold-soft: #f7efd9;
+  --p1: #1f7a55; --p2: #2e5d8a; --p3: #a06b10; --p4: #7a3e6a;
+  --proc: #4a5751; --sim: #6b4fb0; --ment: #b07d12; --today: #d03b3b;
+  --font: 'Inter', system-ui, sans-serif; --display: 'Fraunces', Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1311; --surface: #151c19; --surface-2: #19211e; --ink: #ecefe9; --ink-2: #b7c0ba; --ink-3: #85908a;
+  --line: #26302c; --line-2: #34403b; --brand: #0b2e22; --gold-soft: #2a2416; --proc: #a9b4ae; --sim: #a891e6; --ment: #e0b85a;
+  --p1: #3fa77a; --p2: #5b8fc4; --p3: #d39a3a; --p4: #b878a8; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); }
+.top { background: var(--brand); color: #f3efe2; padding: 10px max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 12px; align-items: center; }
+.top b { font-family: var(--display); font-size: 17px; }
+.top small { opacity: .7; }
+.wrap { padding: 14px max(16px, env(safe-area-inset-left, 0px)) 24px; }
+.bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.crumb { flex: 1; min-width: 260px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.crumb .k { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.crumb .ph { font-family: var(--display); font-size: 20px; }
+.crumb .sub { color: var(--ink-2); }
+.crumb .rng { color: var(--ink-3); font-size: 12.5px; }
+.ctrl { display: flex; gap: 4px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.ctrl button { border: 0; background: none; color: var(--ink-2); padding: 7px 11px; border-radius: 8px; font: 600 13px var(--font); cursor: pointer; }
+.ctrl button:hover { background: var(--surface-2); color: var(--ink); }
+.ctrl button.on { background: var(--gold-soft); color: var(--gold); }
+.ctrl .sep { width: 1px; height: 20px; background: var(--line); }
+.lanes-toggle { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 10px; }
+.lt { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: 12.5px; font-weight: 600; cursor: pointer; color: var(--ink-2); }
+.lt i { width: 9px; height: 9px; border-radius: 50%; }
+.lt.off { opacity: .45; }
+.view { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; user-select: none; touch-action: none; cursor: grab; }
+.view.drag { cursor: grabbing; }
+.lane { position: relative; border-top: 1px solid var(--line); }
+.lane:first-child { border-top: 0; }
+.lane-h { position: absolute; left: 10px; top: 8px; z-index: 5; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--surface); padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
+.lane-h i { width: 8px; height: 8px; border-radius: 50%; }
+.grid-l { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line); opacity: .7; }
+.grid-l.major { background: var(--line-2); opacity: 1; }
+.phase { position: absolute; height: 26px; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; padding: 0 10px; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.phase.sub { height: 20px; font-weight: 600; font-size: 11px; opacity: .9; }
+.phase .d { font-weight: 500; opacity: .85; margin-left: 8px; }
+.ev { position: absolute; cursor: pointer; }
+.ev .dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; transform: translate(-5px, -5px); border: 2px solid var(--surface); }
+.ev .stem { position: absolute; width: 1px; opacity: .55; }
+.ev .lab { position: absolute; transform: translateX(-6px); background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid; border-radius: 6px; padding: 3px 8px; white-space: nowrap; font-size: 12px; line-height: 1.3; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.ev .lab small { display: block; font-size: 10.5px; color: var(--ink-3); }
+.ev:hover .lab, .ev.sel .lab { border-color: var(--ink-3); background: var(--surface); }
+.ev.milestone .dot { width: 14px; height: 14px; border-radius: 3px; transform: translate(-7px, -7px) rotate(45deg); }
+.ev.dim .lab { opacity: .55; }
+.agg { position: absolute; transform: translateX(-50%); background: var(--gold-soft); color: var(--ment); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--today); z-index: 4; pointer-events: none; }
+.today span { position: absolute; top: 4px; left: 4px; background: var(--today); color: #fff; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+.axis { position: relative; height: 34px; border-top: 1px solid var(--line-2); background: var(--surface-2); }
+.tick { position: absolute; top: 0; font-size: 11px; color: var(--ink-3); transform: translateX(4px); padding-top: 4px; white-space: nowrap; border-left: 1px solid var(--line-2); padding-left: 4px; height: 100%; }
+.tick.major { color: var(--ink); font-weight: 700; }
+.below { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.scale { font-size: 12px; color: var(--ink-3); min-width: 120px; }
+.mini { position: relative; flex: 1; min-width: 240px; height: 26px; border-radius: 8px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); cursor: pointer; }
+.mini .m { position: absolute; top: 0; bottom: 0; opacity: .85; }
+.mini .win { position: absolute; top: 0; bottom: 0; border: 2px solid var(--ink); border-radius: 6px; background: rgba(255,255,255,.12); }
+.hint { font-size: 12px; color: var(--ink-3); }
+.hint kbd { border: 1px solid var(--line-2); border-radius: 4px; padding: 0 5px; font: 600 11px var(--font); background: var(--surface); }
+.panel { position: fixed; right: 16px; bottom: 16px; width: min(380px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line-2); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.18); padding: 16px 18px; z-index: 20; }
+.panel h3 { margin: 4px 0 6px; font: 600 18px/1.25 var(--display); }
+.panel .tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.panel p { margin: 6px 0 0; color: var(--ink-2); }
+.panel .when { color: var(--ink-3); font-size: 13px; }
+.panel button { position: absolute; top: 10px; right: 10px; border: 0; background: var(--surface-2); border-radius: 8px; padding: 4px 9px; cursor: pointer; color: var(--ink-2); }
+.panel a { color: var(--p1); font-weight: 600; }
+.note { margin-top: 14px; font-size: 12.5px; color: var(--ink-3); max-width: 900px; }
+</style>
+</head>
+<body>
+<div class="top"><b>Timeline</b><small>exemplo · uma aluna que começa a mentoria em janeiro de 2027 · datas ilustrativas</small></div>
+<div class="wrap">
+  <div class="bar">
+    <div class="crumb" id="crumb"></div>
+    <div class="ctrl" id="ctrl">
+      <button data-z="out" title="Afastar">−</button>
+      <button data-z="in" title="Aproximar">+</button>
+      <span class="sep"></span>
+      <button data-p="all">Tudo</button><button data-p="year">Ano</button><button data-p="month">Mês</button><button data-p="week">Semana</button>
+      <span class="sep"></span>
+      <button data-p="today">Hoje</button>
+    </div>
+  </div>
+  <div class="lanes-toggle" id="toggles"></div>
+  <div class="view" id="view"></div>
+  <div class="below">
+    <span class="scale" id="scale"></span>
+    <div class="mini" id="mini"></div>
+    <span class="hint"><kbd>roda</kbd> aproxima · <kbd>arrastar</kbd> anda no tempo · clique num item para ver o detalhe</span>
+  </div>
+  <p class="note">Exemplo para discutir o formato. As datas e o programa da mentoria são ilustrativos. A ordem e as datas das provas mudam de aluno para aluno.</p>
+</div>
+<div id="panelSlot"></div>
+
+<script>
+// ---------- Dados do exemplo ----------
+const D = (s) => Math.round(Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 864e5);
+const S = (d) => new Date(d * 864e5);
+const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const fmt = (d, y = true) => { const x = S(d); return `${x.getUTCDate()} ${MES[x.getUTCMonth()]}${y ? ' ' + x.getUTCFullYear() : ''}`; };
+const DOW = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+
+const START = D('2027-01-04');
+const TODAY = D('2027-02-17'); // "hoje" do exemplo
+
+const PHASES = [
+  { id: 's1', label: 'Step 1', a: '2027-01-04', b: '2027-07-20', c: 'var(--p1)', subs: [
+    ['Base e Anki', '2027-01-04', '2027-02-28'], ['1ª passada do UWorld', '2027-03-01', '2027-05-15'], ['Simulados e revisão', '2027-05-16', '2027-07-20']] },
+  { id: 's2', label: 'Step 2 CK', a: '2027-08-02', b: '2028-01-18', c: 'var(--p2)', subs: [
+    ['Base clínica', '2027-08-02', '2027-09-30'], ['UWorld CK', '2027-10-01', '2027-12-10'], ['Simulados e revisão', '2027-12-11', '2028-01-18']] },
+  { id: 'cert', label: 'Inglês e certificação', a: '2028-02-01', b: '2028-04-15', c: 'var(--p3)', subs: [
+    ['Pathways e OET', '2028-02-01', '2028-03-10'], ['Certificação do ECFMG', '2028-03-11', '2028-04-15']] },
+  { id: 'match', label: 'Aplicação e Match', a: '2028-05-01', b: '2029-03-16', c: 'var(--p4)', subs: [
+    ['Estágios e cartas', '2028-05-01', '2028-08-31'], ['ERAS', '2028-09-01', '2028-09-30'], ['Entrevistas', '2028-10-01', '2029-01-31'], ['Ranking', '2029-02-01', '2029-03-04']] },
+].map((p) => ({ ...p, a: D(p.a), b: D(p.b), subs: p.subs.map(([l, a, b]) => ({ label: l, a: D(a), b: D(b) })) }));
+
+const LANES = [
+  { id: 'marcos', label: 'Marcos', color: 'var(--gold-mark)', min: 0, rows: 2 },
+  { id: 'processo', label: 'Processo', color: 'var(--proc)', min: 2, rows: 4 },
+  { id: 'simulados', label: 'Simulados', color: 'var(--sim)', min: 2, rows: 3 },
+  { id: 'mentoria', label: 'Mentoria', color: 'var(--ment)', min: 5, rows: 3 },
+];
+
+const E = [];
+const ev = (lane, date, title, text, extra = {}) => E.push({ lane, d: D(date), title, text, ...extra });
+// Marcos
+ev('marcos', '2027-01-04', 'Início da mentoria', 'Primeiro dia: combinado de metas e configuração do acompanhamento.', { m: 1 });
+ev('marcos', '2027-07-20', 'Step 1', 'Dia da prova.', { m: 1 });
+ev('marcos', '2028-01-18', 'Step 2 CK', 'Dia da prova.', { m: 1 });
+ev('marcos', '2028-04-15', 'Certificação do ECFMG', 'Previsão, depois do Step 1, Step 2 CK, OET e verificação do diploma.', { m: 1 });
+ev('marcos', '2028-09-27', 'ERAS enviado', 'Candidatura às residências.', { m: 1 });
+ev('marcos', '2029-03-16', 'Match Day', 'Resultado do Match.', { m: 1 });
+ev('marcos', '2029-07-01', 'Início da residência', '', { m: 1 });
+// Processo
+ev('processo', '2027-01-05', 'Conferir a faculdade no WDOMS', 'Ver as Sponsor Notes do seu ano de formatura.', { guide: 'inscricao' });
+ev('processo', '2027-01-06', 'Criar a conta no MyIntealth', 'Escolher ECFMG, não EPIC. Abertura de conta: US$110.', { guide: 'inscricao' });
+ev('processo', '2027-01-13', 'Tradução juramentada', 'Diploma e histórico, antes de enviar.', { guide: 'inscricao' });
+ev('processo', '2027-01-15', 'Verificação de identidade por vídeo', 'Cerca de 5 minutos, com o passaporte.', { guide: 'inscricao' });
+ev('processo', '2027-02-22', 'Credenciais verificadas', 'Previsão. Pode levar de dias a semanas.', { guide: 'inscricao' });
+ev('processo', '2027-04-12', 'Pagar o Step 1 no FSMB', 'Escolher o período de 3 meses (jul a set). US$905 no Brasil.', { guide: 'custos' });
+ev('processo', '2027-04-14', 'Marcar a data na Prometric', 'Remarcar com 46 dias ou mais é grátis.', { guide: 'custos' });
+ev('processo', '2027-08-12', 'Resultado do Step 1', 'Previsão: algumas semanas depois da prova.');
+ev('processo', '2027-10-04', 'Pagar o Step 2 CK no FSMB', 'Período de dez a fev. US$930 no Brasil.', { guide: 'custos' });
+ev('processo', '2028-02-10', 'Resultado do Step 2 CK', 'Previsão.');
+ev('processo', '2028-02-01', 'Inscrição no Pathways', 'Comprovação de inglês pelo OET.', { guide: 'provas' });
+ev('processo', '2028-03-08', 'OET', 'Prova de inglês.', { guide: 'provas' });
+ev('processo', '2028-06-07', 'Token do ERAS', 'Pedido pelo MyIntealth.');
+ev('processo', '2029-03-03', 'Lista de ranking', 'Prazo para ordenar os programas.');
+// Simulados
+[['2027-05-17', 'NBME (CBSSA)'], ['2027-06-07', 'NBME (CBSSA)'], ['2027-06-24', 'UWSA'], ['2027-07-08', 'Free 120'],
+ ['2027-12-13', 'NBME (CCSSA)'], ['2027-12-29', 'UWSA'], ['2028-01-08', 'Free 120']].forEach(([d, t]) => ev('simulados', d, t, 'Registrar o resultado no acompanhamento.', { guide: 'simulados' }));
+// Mentoria (programa de 3 meses, como nas ideias iniciais; ilustrativo)
+const add = (d, n) => d + n;
+let first = START; // segunda 04/01/2027
+ev('mentoria', '2027-01-05', 'Aula: como usar o Anki (gravada)', 'Fica na aba Aulas.', { kind: 'aula' });
+for (let w = 0; w < 4; w++) E.push({ lane: 'mentoria', d: add(first, 1 + w * 7), title: 'Individual · 50 min', text: 'Terça, 20h. Mês 1: um encontro por semana.', kind: 'ind', h: '20h' });
+for (let w = 0; w < 4; w++) E.push({ lane: 'mentoria', d: add(first, 29 + w * 14), title: 'Individual · 30 min', text: 'Terça, 20h. Meses 2 e 3: a cada duas semanas.', kind: 'ind', h: '20h' });
+for (let w = 0; w < 7; w++) E.push({ lane: 'mentoria', d: add(first, 10 + w * 14), title: 'Encontro em grupo', text: 'Quinta, 20h. A gravação vai para Aulas.', kind: 'grupo', h: '20h' });
+E.push({ lane: 'mentoria', d: add(first, 38), title: 'Aula ao vivo: Anki', text: 'Em grupo, no mês 2.', kind: 'aula', h: '20h' });
+for (let w = 0; w < 13; w++) E.push({ lane: 'mentoria', d: add(first, 6 + w * 7), title: 'Check-in da semana', text: 'Domingo: conferir o painel e as metas da semana seguinte.', kind: 'check', min: 16 });
+E.push({ lane: 'mentoria', d: D('2027-04-05'), title: 'Fim do programa de 3 meses', text: 'A partir daqui: acompanhamento mensal, sessão avulsa ou seguir sozinho.', kind: 'aula' });
+
+const ALL_A = START - 20, ALL_B = D('2029-07-20');
+
+// ---------- Estado da vista ----------
+let t0 = ALL_A, t1 = ALL_B; // intervalo visível, em dias
+const on = Object.fromEntries(LANES.map((l) => [l.id, true]));
+let sel = null;
+const view = document.getElementById('view');
+
+function W() { return view.clientWidth; }
+const ppd = () => W() / (t1 - t0); // pixels por dia
+const X = (d) => ((d - t0) / (t1 - t0)) * W();
+
+function setRange(a, b, anim) {
+  const span = Math.max(5, Math.min(ALL_B - ALL_A, b - a));
+  let c = (a + b) / 2;
+  a = c - span / 2; b = c + span / 2;
+  if (a < ALL_A) { b += ALL_A - a; a = ALL_A; }
+  if (b > ALL_B) { a -= b - ALL_B; b = ALL_B; }
+  if (!anim) { t0 = a; t1 = b; render(); return; }
+  const s0 = t0, s1 = t1, T = performance.now();
+  const step = (now) => { const k = Math.min(1, (now - T) / 260), e = 1 - Math.pow(1 - k, 3); t0 = s0 + (a - s0) * e; t1 = s1 + (b - s1) * e; render(); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function zoom(f, at) { const c = at ?? (t0 + t1) / 2; setRange(c - (c - t0) * f, c + (t1 - c) * f); }
+
+// ---------- Régua ----------
+function ticks() {
+  const p = ppd(), out = [];
+  const first = (d, unit) => { const x = S(d); if (unit === 'y') return D(`${x.getUTCFullYear()}-01-01`); if (unit === 'm') return D(`${x.getUTCFullYear()}-${String(x.getUTCMonth() + 1).padStart(2, '0')}-01`); return d; };
+  if (p < 0.5) { // anos e trimestres
+    for (let d = first(t0, 'y'); d < t1; ) { const x = S(d); const y = x.getUTCFullYear(), m = x.getUTCMonth(); out.push({ d, l: m === 0 ? String(y) : MES[m], major: m === 0 }); const nm = m + 3; d = D(`${nm > 11 ? y + 1 : y}-${String((nm % 12) + 1).padStart(2, '0')}-01`); }
+  } else if (p < 7) { // meses
+    for (let d = first(t0, 'm'); d < t1; ) { const x = S(d); const y = x.getUTCFullYear(), m = x.getUTCMonth(); out.push({ d, l: m === 0 ? `${MES[m]} ${y}` : MES[m], major: m === 0 }); d = D(`${m === 11 ? y + 1 : y}-${String(((m + 1) % 12) + 1).padStart(2, '0')}-01`); }
+  } else if (p < 46) { // semanas (segundas)
+    let d = Math.floor(t0); while (S(d).getUTCDay() !== 1) d++;
+    for (; d < t1; d += 7) { const x = S(d); out.push({ d, l: `${x.getUTCDate()} ${MES[x.getUTCMonth()]}`, major: x.getUTCDate() <= 7 }); }
+  } else { // dias
+    for (let d = Math.floor(t0); d < t1; d++) { const x = S(d); out.push({ d, l: `${DOW[x.getUTCDay()]} ${x.getUTCDate()}`, major: x.getUTCDay() === 1 }); }
+  }
+  return out;
+}
+
+// ---------- Onde estou ----------
+function crumb() {
+  const c = (t0 + t1) / 2, span = t1 - t0;
+  const ph = PHASES.find((p) => c >= p.a && c <= p.b) || PHASES.reduce((best, p) => (Math.abs((p.a + p.b) / 2 - c) < Math.abs((best.a + best.b) / 2 - c) ? p : best));
+  const sub = ph.subs.find((s) => c >= s.a && c <= s.b);
+  const weekN = Math.floor((c - START) / 7) + 1;
+  const where = span > 500 ? 'Visão geral' : ph.label;
+  const det = span > 500 ? 'do início da mentoria ao início da residência' : [sub && sub.label, c >= START && span < 120 ? `semana ${weekN} da mentoria` : ''].filter(Boolean).join(' · ');
+  document.getElementById('crumb').innerHTML = `<span class="k">Você está em</span><span class="ph" style="color:${span > 500 ? 'var(--ink)' : ph.c}">${where}</span><span class="sub">${det}</span><span class="rng">${fmt(Math.round(t0))} – ${fmt(Math.round(t1))}</span>`;
+  const p = ppd();
+  document.getElementById('scale').textContent = p < 0.5 ? 'Vendo anos' : p < 7 ? 'Vendo meses' : p < 46 ? 'Vendo semanas' : 'Vendo dias';
+  document.querySelectorAll('[data-p]').forEach((b) => b.classList.toggle('on', (b.dataset.p === 'all' && span > 700) || (b.dataset.p === 'year' && span > 200 && span <= 700) || (b.dataset.p === 'month' && span > 20 && span <= 200) || (b.dataset.p === 'week' && span <= 20)));
+}
+
+// ---------- Desenho ----------
+function laneEvents(lane) {
+  const p = ppd();
+  const list = E.filter((e) => e.lane === lane.id && e.d >= t0 - 30 && e.d <= t1 + 30 && p >= (e.min ?? lane.min));
+  return list.sort((a, b) => a.d - b.d);
+}
+function placeLabels(list, maxRows) {
+  const rowsEnd = Array(maxRows).fill(-1e9);
+  return list.map((e) => {
+    const x = X(e.d), w = Math.min(260, 14 + e.title.length * 6.4);
+    let r = rowsEnd.findIndex((end) => end < x - 4);
+    if (r >= 0) rowsEnd[r] = x + w;
+    return { e, x, row: r };
+  });
+}
+function render() {
+  const p = ppd();
+  const tk = ticks();
+  let html = '';
+  const grid = tk.map((t) => `<div class="grid-l ${t.major ? 'major' : ''}" style="left:${X(t.d)}px"></div>`).join('');
+  // Fases
+  html += `<div class="lane" style="height:84px"><span class="lane-h"><i style="background:var(--p1)"></i>Fases</span>${grid}
+    ${PHASES.map((ph) => { const x1 = X(ph.a), x2 = X(ph.b); if (x2 < 0 || x1 > W()) return ''; const w = x2 - x1;
+      const vis = Math.min(x2, W()) - Math.max(x1, 0), pad = Math.max(0, -x1);
+      return `<div class="phase" data-ph="${ph.id}" style="left:${x1}px;width:${w}px;top:30px;background:${ph.c};padding-left:${10 + pad}px">${vis > 70 ? ph.label : ''}${vis > 260 ? `<span class="d">${fmt(ph.a, false)} – ${fmt(ph.b)}</span>` : ''}</div>`
+        + (p > 0.35 ? ph.subs.map((s) => { const a = X(s.a), b = X(s.b), sw = b - a - 2; if (b < 0 || a > W()) return ''; const sv = Math.min(b, W()) - Math.max(a, 0); return `<div class="phase sub" data-ph="${ph.id}" style="left:${a}px;width:${sw}px;top:58px;background:${ph.c};padding-left:${10 + Math.max(0, -a)}px">${sv > 90 ? s.label : ''}</div>`; }).join('') : ''); }).join('')}</div>`;
+  // Faixas de eventos
+  for (const lane of LANES) {
+    if (!on[lane.id]) continue;
+    const rowH = 34;
+    const placedAll = (lane.id === 'mentoria' && p < lane.min) ? [] : placeLabels(laneEvents(lane), lane.rows).filter((q) => q.x > -280 && q.x < W() + 20);
+    const used = Math.max(1, ...placedAll.map((q) => q.row + 1));
+    const maxRows = (lane.id === 'mentoria' && p < lane.min) ? 1 : used;
+    const base = 30 + maxRows * rowH + 8;
+    let inner = '';
+    if (lane.id !== 'mentoria' && p < lane.min) {
+      const n = E.filter((e) => e.lane === lane.id && e.d >= t0 && e.d <= t1).length;
+      html += `<div class="lane" style="height:38px"><span class="lane-h"><i style="background:${lane.color}"></i>${lane.label}</span><span style="position:absolute;left:130px;top:10px;font-size:11.5px;color:var(--ink-3)">${n} itens · aproxime para ver</span>${E.filter((e) => e.lane === lane.id).map((e) => { const x = X(e.d); return x < 0 || x > W() ? '' : `<span style="position:absolute;left:${x - 3}px;top:26px;width:6px;height:6px;border-radius:50%;background:${lane.color};opacity:.7"></span>`; }).join('')}</div>`;
+      continue;
+    }
+    if (lane.id === 'mentoria' && p < lane.min) {
+      // Longe: resumo por mês
+      const byMonth = {};
+      E.filter((e) => e.lane === 'mentoria' && e.kind !== 'check').forEach((e) => { const x = S(e.d); const k = `${x.getUTCFullYear()}-${x.getUTCMonth()}`; (byMonth[k] = byMonth[k] || []).push(e); });
+      const monthW = 30.4 * p;
+      if (monthW < 80) {
+        const ms = E.filter((e) => e.lane === 'mentoria' && e.kind !== 'check'); const a = ms[0].d, z = ms[ms.length - 1].d, x = X((a + z) / 2);
+        inner = `<span class="agg" data-zoomto="${Math.round((a + z) / 2)}" data-span="${z - a + 20}" style="left:${x}px;top:${base - 30}px">Programa de 3 meses · ${ms.length} encontros e aulas</span>`;
+      } else inner = Object.entries(byMonth).map(([k, list]) => { const [y, m] = k.split('-').map(Number); const mid = D(`${y}-${String(m + 1).padStart(2, '0')}-15`); const x = X(mid); if (x < -60 || x > W() + 60) return '';
+        const ind = list.filter((e) => e.kind === 'ind').length, gr = list.filter((e) => e.kind === 'grupo').length, au = list.filter((e) => e.kind === 'aula').length;
+        const parts = [ind && `${ind} indiv.`, gr && `${gr} grupo`, au && `${au} aula`].filter(Boolean).join(' · ');
+        return `<span class="agg" data-zoomto="${mid}" style="left:${x}px;top:${base - 30}px" title="Aproximar para ver os dias">${p < 2.5 ? `${list.length} encontros` : parts}</span>`; }).join('');
+      inner += `<span style="position:absolute;left:120px;top:9px;font-size:11.5px;color:var(--ink-3)">aproxime para ver cada encontro</span>`;
+    } else {
+      const placed = placedAll;
+      if (!placed.length) inner = `<span style="position:absolute;left:120px;top:10px;font-size:11.5px;color:var(--ink-3)">nada neste período</span>`;
+      else inner = placed.map(({ e, x, row }) => {
+        if (x < -280 || x > W() + 20) return '';
+        const top = row >= 0 ? 30 + (maxRows - 1 - row) * rowH : null;
+        const col = lane.color;
+        const idx = E.indexOf(e);
+        return `<div class="ev ${e.m ? 'milestone' : ''} ${sel === idx ? 'sel' : ''}" data-ev="${idx}">
+          ${top != null ? `<div class="stem" style="left:${x}px;top:${top + 26}px;height:${base - top - 26}px;background:${col}"></div>
+          <div class="lab" style="left:${x}px;top:${top}px;border-left-color:${col}">${e.title}<small>${fmt(e.d, p < 3)}${e.h ? ' · ' + e.h : ''}</small></div>` : ''}
+          <div class="dot" style="left:${x}px;top:${base}px;background:${col}"></div></div>`;
+      }).join('');
+    }
+    html += `<div class="lane" style="height:${(lane.id !== 'mentoria' || p >= lane.min) && !placedAll.length ? 40 : base + 16}px"><span class="lane-h"><i style="background:${lane.color}"></i>${lane.label}</span>${grid}${inner}</div>`;
+  }
+  // Hoje + régua
+  const xt = X(TODAY);
+  html += `<div class="axis">${tk.map((t) => `<span class="tick ${t.major ? 'major' : ''}" style="left:${X(t.d) - 4}px">${t.l}</span>`).join('')}</div>`;
+  view.innerHTML = html + (xt >= 0 && xt <= W() ? `<div class="today" style="left:${xt}px"><span>hoje (exemplo)</span></div>` : '');
+  crumb(); mini();
+}
+
+// ---------- Minimapa ----------
+function mini() {
+  const el = document.getElementById('mini'), w = el.clientWidth, k = (d) => ((d - ALL_A) / (ALL_B - ALL_A)) * w;
+  el.innerHTML = PHASES.map((p) => `<span class="m" style="left:${k(p.a)}px;width:${k(p.b) - k(p.a)}px;background:${p.c}"></span>`).join('')
+    + `<span class="win" style="left:${k(t0)}px;width:${Math.max(6, k(t1) - k(t0))}px"></span>`;
+}
+document.getElementById('mini').addEventListener('pointerdown', (e) => {
+  const el = e.currentTarget, r = el.getBoundingClientRect();
+  const go = (cx) => { const c = ALL_A + ((cx - r.left) / r.width) * (ALL_B - ALL_A), h = (t1 - t0) / 2; setRange(c - h, c + h); };
+  go(e.clientX); el.setPointerCapture(e.pointerId);
+  el.onpointermove = (m) => go(m.clientX); el.onpointerup = () => { el.onpointermove = null; };
+});
+
+// ---------- Interação ----------
+view.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const r = view.getBoundingClientRect(), at = t0 + ((e.clientX - r.left) / r.width) * (t1 - t0);
+  if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) { const dd = ((e.deltaX || e.deltaY) / r.width) * (t1 - t0); setRange(t0 + dd, t1 + dd); }
+  else zoom(Math.exp(e.deltaY * 0.0022), at);
+}, { passive: false });
+let drag = null;
+view.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, a: t0, b: t1, moved: false }; view.setPointerCapture(e.pointerId); });
+view.addEventListener('pointermove', (e) => { if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 3) { drag.moved = true; view.classList.add('drag'); } const dd = (-dx / W()) * (drag.b - drag.a); setRange(drag.a + dd, drag.b + dd); });
+view.addEventListener('pointerup', (e) => {
+  view.classList.remove('drag'); const moved = drag && drag.moved; drag = null; if (moved) return;
+  const t = document.elementFromPoint(e.clientX, e.clientY);
+  const evEl = t && t.closest('[data-ev]'), ph = t && t.closest('[data-ph]'), ag = t && t.closest('[data-zoomto]');
+  if (ag) { const c = +ag.dataset.zoomto, h = (+ag.dataset.span || 40) / 2; setRange(c - h, c + h, true); return; }
+  if (evEl) { sel = +evEl.dataset.ev; showPanel(E[sel]); render(); return; }
+  if (ph) { const p = PHASES.find((x) => x.id === ph.dataset.ph); setRange(p.a - (p.b - p.a) * 0.05, p.b + (p.b - p.a) * 0.05, true); }
+});
+document.getElementById('ctrl').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.z) return zoom(b.dataset.z === 'in' ? 0.6 : 1.6);
+  const c = b.dataset.p === 'today' ? TODAY : (t0 + t1) / 2;
+  const spans = { all: ALL_B - ALL_A, year: 365, month: 40, week: 9, today: Math.min(t1 - t0, 40) };
+  if (b.dataset.p === 'all') return setRange(ALL_A, ALL_B, true);
+  setRange(c - spans[b.dataset.p] / 2, c + spans[b.dataset.p] / 2, true);
+});
+const tg = document.getElementById('toggles');
+tg.innerHTML = LANES.map((l) => `<span class="lt" data-lane="${l.id}"><i style="background:${l.color}"></i>${l.label}</span>`).join('');
+tg.addEventListener('click', (e) => { const b = e.target.closest('[data-lane]'); if (!b) return; on[b.dataset.lane] = !on[b.dataset.lane]; b.classList.toggle('off', !on[b.dataset.lane]); render(); });
+
+const LANE_NAME = Object.fromEntries(LANES.map((l) => [l.id, l]));
+const GUIDE_NAME = { inscricao: 'Inscrição passo a passo', custos: 'Custos', provas: 'As provas', simulados: 'Simulados' };
+function showPanel(e) {
+  const l = LANE_NAME[e.lane];
+  document.getElementById('panelSlot').innerHTML = `<div class="panel"><button type="button" id="close">Fechar</button>
+    <span class="tag" style="color:${l.color}">${l.label}</span><h3>${e.title}</h3>
+    <div class="when">${DOW[S(e.d).getUTCDay()]}, ${fmt(e.d)}${e.h ? ' · ' + e.h : ''}</div>
+    ${e.text ? `<p>${e.text}</p>` : ''}${e.guide ? `<p>Guia: <a href="index.html#guia-${e.guide}">${GUIDE_NAME[e.guide]}</a></p>` : ''}</div>`;
+  document.getElementById('close').onclick = () => { sel = null; document.getElementById('panelSlot').innerHTML = ''; render(); };
+}
+addEventListener('resize', render);
+render();
+</script>
+</body>
+</html>

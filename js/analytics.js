@@ -1,7 +1,7 @@
 // Todas as contas do painel. Nada aqui é digitado pelo aluno: sai dos registros.
 
-import { SYSTEMS, SUBJECTS, MISTAKES, MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162315';
-import { today, addDays, diffDays, mondayOf, sum, pct, fmtPct, fmtInt, fmtDate } from './util.js?v=202611162315';
+import { SYSTEMS, SUBJECTS, MISTAKES, MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162334';
+import { today, addDays, diffDays, mondayOf, sum, pct, fmtPct, fmtInt, fmtDate } from './util.js?v=202611162334';
 
 export const MIN_N = 20; // abaixo disso, a % de acerto ainda não diz muito
 

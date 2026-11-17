@@ -1,11 +1,12 @@
 // Áreas novas da plataforma: Início, Aulas, Timeline e Guias.
 // O admin vê as mesmas páginas de Aulas e Guia, com o botão Editar.
 
-import { store } from './store.js?v=202611162315';
-import { analyze } from './analytics.js?v=202611162315';
-import { GUIDES, PRICES, CHECKED } from './guides.js?v=202611162315';
-import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, diffDays } from './util.js?v=202611162315';
-import { icon, toast } from './ui.js?v=202611162315';
+import { store } from './store.js?v=202611162334';
+import { analyze } from './analytics.js?v=202611162334';
+import { GUIDES, PRICES, CHECKED } from './guides.js?v=202611162334';
+import { upcomingCard } from './view-timeline.js?v=202611162334';
+import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, diffDays } from './util.js?v=202611162334';
+import { icon, toast } from './ui.js?v=202611162334';
 
 const noHandlers = (root) => { root.onclick = root.oninput = root.onchange = root.onsubmit = null; };
 const draft = (txt) => `<span class="draft">${icon('info')} ${txt}</span>`;
@@ -47,16 +48,11 @@ export function renderHome(root, ctx) {
         </div>
       </div>
       <div class="card">
-        <div class="card-h"><div><h2>Próximo encontro</h2><p>A agenda real entra quando definirmos os encontros.</p></div></div>
-        <div class="meet"><span class="meet-d"><b>qui</b>20h</span><div><b>Encontro individual</b><small>30 min · link da chamada aparece aqui</small></div></div>
-        <div class="meet"><span class="meet-d"><b>ter</b>20h</span><div><b>Encontro em grupo</b><small>A gravação vai para Aulas depois</small></div></div>
-        ${draft('Exemplo')}
-      </div>
-      <div class="card">
         <div class="card-h"><div><h2>Continue de onde parou</h2><p>${seen.size} de ${lessons.length} aulas assistidas.</p></div></div>
         ${next ? `<a class="lesson-row" href="#aula-${next.id}"><span class="play">${icon('play')}</span><span class="lr-t"><b>${esc(next.title)}</b><small>${esc(next.module.title)} · ${next.min} min</small></span>${icon('chevron')}</a>` : '<div class="empty">Você assistiu todas as aulas.</div>'}
         <div class="meter" style="margin-top:12px"><i style="width:${(seen.size / Math.max(1, lessons.length)) * 100}%"></i></div>
       </div>
+      ${upcomingCard(ctx)}
       <div class="card span-2">
         <div class="card-h"><div><h2>Onde focar agora</h2><p>Últimos 7 dias.</p></div><a class="btn btn-ghost btn-sm" href="#painel">Ver painel ${icon('chevron')}</a></div>
         ${focus.length ? focus.map((i) => `<div class="ins ${i.severity}">${icon(i.severity === 'gap' ? 'target' : i.severity === 'critical' ? 'alertCircle' : i.severity === 'info' ? 'info' : 'alert')}<div><b>${esc(i.title)}</b><small>${esc(i.detail)}</small></div></div>`).join('') : `<div class="ins good">${icon('checkCircle')}<div><b>Tudo no ritmo</b><small>Nenhum alerta nos últimos 7 dias.</small></div></div>`}
@@ -145,24 +141,6 @@ export function renderLesson(root, ctx, id) {
     toast('Aula salva');
     ctx.refresh();
   };
-}
-
-// ---------------- Timeline ----------------
-export function renderTimeline(root, ctx) {
-  const data = ctx.data; const s = data.settings; const t = today();
-  const evs = [
-    { date: s.startDate, title: 'Início da mentoria', kind: 'start' },
-    ...data.assessments.map((x) => ({ date: x.date, title: `${x.kind} ${x.name}`, detail: `${fmtPct(x.pct)} de acerto`, kind: 'sim' })),
-    { date: t, title: 'Hoje', kind: 'today' },
-    ...(s.examDate ? [{ date: s.examDate, title: s.exam, detail: `faltam ${diffDays(s.examDate, t)} dias`, kind: 'exam' }] : [{ date: '9999-12-31', nodate: true, title: s.exam, detail: 'Sem data marcada', kind: 'exam' }]),
-  ].sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
-  root.innerHTML = `
-    <div class="zone-head"><div><h1>Minha timeline</h1></div></div>
-    <div class="privacy" style="margin-bottom:16px">${icon('info')}<div><b>Rascunho.</b> A timeline ainda vai ser desenhada numa conversa própria. Por enquanto, mostra só datas que já existem no sistema: início, simulados, hoje e prova.</div></div>
-    <div class="card"><ol class="tl">
-      ${evs.map((e) => `<li class="tl-${e.kind} ${e.date > t ? 'future' : ''}"><span class="tl-dot"></span><span class="tl-date">${e.nodate ? '—' : fmtDate(e.date)}</span><div><b>${esc(e.title)}</b>${e.detail ? `<small>${esc(e.detail)}</small>` : ''}</div></li>`).join('')}
-    </ol></div>`;
-  noHandlers(root);
 }
 
 // ---------------- Guias ----------------

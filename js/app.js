@@ -1,15 +1,16 @@
 // Roteador e moldura da plataforma: topo verde, abas, sub-abas e barra de baixo no celular.
 
-import { store } from './store.js?v=202611162315';
-import { icon, initials, installTooltips } from './ui.js?v=202611162315';
-import { destroyCharts } from './charts.js?v=202611162315';
-import { renderRegister, setRegisterDate } from './view-register.js?v=202611162315';
-import { renderStudentDashboard } from './view-dashboard.js?v=202611162315';
-import { renderRoster, renderMentorStudent } from './view-mentor.js?v=202611162315';
-import { renderHistory, renderSettings, renderLogin } from './view-other.js?v=202611162315';
-import { renderHome, renderLessons, renderLesson, renderTimeline, renderGuide } from './view-platform.js?v=202611162315';
-import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js?v=202611162315';
-import { esc } from './util.js?v=202611162315';
+import { store } from './store.js?v=202611162334';
+import { icon, initials, installTooltips } from './ui.js?v=202611162334';
+import { destroyCharts } from './charts.js?v=202611162334';
+import { renderRegister, setRegisterDate } from './view-register.js?v=202611162334';
+import { renderStudentDashboard } from './view-dashboard.js?v=202611162334';
+import { renderRoster, renderMentorStudent } from './view-mentor.js?v=202611162334';
+import { renderHistory, renderSettings, renderLogin } from './view-other.js?v=202611162334';
+import { renderHome, renderLessons, renderLesson, renderGuide } from './view-platform.js?v=202611162334';
+import { renderTimeline, renderAdminTimeline } from './view-timeline.js?v=202611162334';
+import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js?v=202611162334';
+import { esc } from './util.js?v=202611162334';
 
 const $top = document.getElementById('top');
 const $nav = document.getElementById('nav');
@@ -19,7 +20,7 @@ const $bottom = document.getElementById('bottom');
 
 const ACOMP = ['registrar', 'painel', 'historico', 'ajustes'];
 const STUDENT_PAGES = ['inicio', 'aulas', 'aula', 'timeline', 'guia', 'guiapage', ...ACOMP];
-const ADMIN_PAGES = ['geral', 'alunos', 'aluno', 'aulas', 'aula', 'guia', 'guiapage', 'crm', 'acervo', 'config'];
+const ADMIN_PAGES = ['geral', 'alunos', 'aluno', 'timeline', 'tla', 'aulas', 'aula', 'guia', 'guiapage', 'crm', 'acervo', 'config'];
 
 // [rota, rótulo, ícone, rotas que deixam a aba ativa]
 const STUDENT_TABS = [
@@ -32,6 +33,7 @@ const STUDENT_TABS = [
 const ADMIN_TABS = [
   ['geral', 'Painel geral', 'grid', ['geral']],
   ['alunos', 'Alunos', 'users', ['alunos', 'aluno']],
+  ['timeline', 'Timeline', 'route', ['timeline', 'tla']],
   ['aulas', 'Aulas', 'play', ['aulas', 'aula']],
   ['guia', 'Guias', 'compass', ['guia', 'guiapage']],
   ['crm', 'CRM', 'funnel', ['crm']],
@@ -80,7 +82,7 @@ function frame(real, me, page) {
     : [['geral', 'Geral', 'grid', ['geral']], ['alunos', 'Alunos', 'users', ['alunos', 'aluno']], ['aulas', 'Aulas', 'play', ['aulas', 'aula']]];
   const more = asStudent
     ? [['timeline', 'Timeline', 'route'], ['guia', 'Guias', 'compass'], ['historico', 'Histórico', 'clock'], ['ajustes', 'Ajustes', 'sliders']]
-    : [['guia', 'Guias', 'compass'], ['crm', 'CRM', 'funnel'], ['acervo', 'Acervo', 'bookmark'], ['config', 'Configurações', 'gear']];
+    : [['timeline', 'Timeline', 'route'], ['guia', 'Guias', 'compass'], ['crm', 'CRM', 'funnel'], ['acervo', 'Acervo', 'bookmark'], ['config', 'Configurações', 'gear']];
   const moreOn = more.some(([r]) => r === page);
   $bottom.innerHTML = `${bar.map(([r, label, ic, match, cls]) => `<a href="#${r}" class="${cls || ''} ${match.includes(page) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')}
     <button type="button" data-act="more" class="${moreOn || moreOpen ? 'on' : ''}" aria-expanded="${moreOpen}">${icon('menu')}<span>Mais</span></button>
@@ -95,11 +97,11 @@ function render() {
   let route = location.hash.replace(/^#/, '');
   if (!real) route = 'entrar';
   const asStudent = me && me.role === 'student';
-  let page = route.startsWith('aluno-') ? 'aluno' : route.startsWith('aula-') ? 'aula' : route.startsWith('guia-') ? 'guiapage' : route;
+  let page = route.startsWith('aluno-') ? 'aluno' : route.startsWith('aula-') ? 'aula' : route.startsWith('guia-') ? 'guiapage' : route.startsWith('tla-') ? 'tla' : route;
   if (real && (!page || page === 'entrar' || !(asStudent ? STUDENT_PAGES : ADMIN_PAGES).includes(page))) {
     route = page = asStudent ? 'inicio' : 'geral';
   }
-  const arg = page === 'aluno' ? route.slice(6) : page === 'aula' ? route.slice(5) : page === 'guiapage' ? route.slice(5) : null;
+  const arg = page === 'aluno' ? route.slice(6) : page === 'aula' ? route.slice(5) : page === 'guiapage' ? route.slice(5) : page === 'tla' ? route.slice(4) : null;
   frame(real, me, page);
   document.body.classList.toggle('has-sub', !!$sub.innerHTML);
 
@@ -124,6 +126,7 @@ function render() {
   }
   if (page === 'aluno' && arg) return renderMentorStudent($main, ctx, arg);
   if (page === 'alunos') return renderStudents($main, ctx);
+  if (page === 'timeline' || page === 'tla') return renderAdminTimeline($main, ctx, arg);
   if (page === 'aulas') return renderLessons($main, ctx);
   if (page === 'aula') return renderLesson($main, ctx, arg);
   if (page === 'guia' || page === 'guiapage') return renderGuide($main, ctx, arg);

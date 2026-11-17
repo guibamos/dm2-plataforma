@@ -1,10 +1,10 @@
 // Visão dos mentores: todos os alunos e o painel de cada um (só leitura).
 
-import { store } from './store.js?v=202611162315';
-import { analyze } from './analytics.js?v=202611162315';
-import { fmtPct, fmtInt, fmtDate, esc, today, addDays, diffDays } from './util.js?v=202611162315';
-import { icon, statusChip, initials, deltaHtml, toast } from './ui.js?v=202611162315';
-import { dashboardBody, periodFilter, mountCharts, handleDashClick } from './view-dashboard.js?v=202611162315';
+import { store } from './store.js?v=202611162334';
+import { analyze } from './analytics.js?v=202611162334';
+import { fmtPct, fmtInt, fmtDate, esc, today, addDays, diffDays } from './util.js?v=202611162334';
+import { icon, statusChip, initials, deltaHtml, toast } from './ui.js?v=202611162334';
+import { dashboardBody, periodFilter, mountCharts, handleDashClick } from './view-dashboard.js?v=202611162334';
 
 const ORDER = { critical: 0, serious: 1, warning: 2, good: 3 };
 
@@ -68,7 +68,7 @@ export function renderMentorStudent(root, ctx, studentId) {
       <div style="display:flex;gap:14px;align-items:center">
         <span class="avatar lg">${initials(u.name)}</span>
         <div><span class="eyebrow ana">${icon('sparkles')} Painel do aluno</span><h1 style="margin:2px 0">${esc(u.name)}</h1>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${statusChip(status)}<span class="readonly">${icon('lock')} Só leitura: quem preenche é o aluno</span></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${statusChip(status)}<span class="readonly">${icon('lock')} Só leitura: quem preenche é o aluno</span><a class="btn btn-ghost btn-sm" href="#tla-${u.id}">${icon('route')} Timeline do aluno</a></div></div>
       </div>
       ${periodFilter()}
     </div>
