@@ -98,7 +98,9 @@ export function renderLogin(root, ctx) {
     if (!b) return;
     store.login(b.dataset.login);
     const me = store.me();
-    location.hash = me.role === 'mentor' ? '#geral' : '#inicio';
+    // Se a pessoa abriu um link direto (ex.: #guia-custos), vai para ele depois de escolher o perfil.
+    const want = location.hash.replace(/^#/, '');
+    if (!want || want === 'entrar') location.hash = me.role === 'mentor' ? '#geral' : '#inicio';
     ctx.refresh();
   };
   root.oninput = root.onchange = root.onsubmit = null;

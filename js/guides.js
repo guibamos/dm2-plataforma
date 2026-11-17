@@ -120,8 +120,17 @@ export const GUIDES = [
       { t: 'alert', tone: 'warning', title: 'Tradução pronta antes de começar', text: 'Se o documento traduzido ficar incompleto no MyIntealth, o sistema pode cobrar a tradução do ECFMG por página. Tenha a tradução juramentada de tudo antes de enviar.' },
       { t: 'alert', tone: 'info', title: 'Pagar em dólar', text: 'Cartão de crédito brasileiro cobra IOF e câmbio na fatura. Contas globais com cartão internacional, carregadas por Pix, costumam sair mais barato e são aceitas nos sites.' },
       { t: 'h', text: 'Fontes de estudo e simulados' },
-      { t: 'p', text: 'Os preços de bancos de questões, livros, vídeos e simulados estão nos guias de Fontes de estudo e de Simulados.', links: ['fontes1', 'fontes2', 'simulados'] },
-      { t: 'sources', checked: true, items: [['usmle.org · taxas', 'https://www.usmle.org/apply-exams'], ['usmle.org · remarcação', 'https://www.usmle.org/reschedule-exam'], ['ECFMG · taxas', 'https://www.ecfmg.org/fees/'], ['OET', 'https://oet.com']] },
+      { t: 'table', head: ['Recurso', 'Preço', 'Duração'], rows: [
+        ['UWorld (Step 1 ou Step 2 CK)', 'US$349 · 459 · 519 · 579 · 749', '30 · 90 · 180 · 360 · 730 dias'],
+        ['UWSA (simulado UWorld)', 'US$50 cada ou US$120 os três', '2 semanas cada'],
+        ['NBME (simulado oficial)', 'US$62 cada', '1 simulado'],
+        ['Free 120 (amostra oficial)', 'Grátis', '—'],
+        ['AMBOSS com banco de questões', 'US$448', '1 ano (Step 1 e 2)'],
+        ['AnkiHub (deck AnKing)', 'US$6 por mês', 'Mensal'],
+        ['First Aid Step 1', 'US$65', 'Livro'],
+      ], note: 'Os planos de 90 dias ou mais do UWorld já vêm com 1 a 3 UWSAs. Mais fontes nos guias de Fontes de estudo.' },
+      { t: 'p', text: 'Detalhes de cada fonte:', links: ['fontes1', 'fontes2', 'simulados'] },
+      { t: 'sources', checked: true, items: [['usmle.org · taxas', 'https://www.usmle.org/apply-exams'], ['UWorld', 'https://medical.uworld.com/usmle/'], ['NBME', 'https://www.nbme.org/examinees/self-assessments'], ['usmle.org · remarcação', 'https://www.usmle.org/reschedule-exam'], ['ECFMG · taxas', 'https://www.ecfmg.org/fees/'], ['OET', 'https://oet.com']] },
     ],
   },
   // ------------------------------------------------------------------
@@ -226,7 +235,8 @@ export const GUIDES = [
         { title: 'Transforme em card', text: 'Use o Anki em vez de caderno.' },
       ] },
       { t: 'alert', tone: 'warning', title: 'Erro comum', text: 'Comprar fontes demais. Um banco de questões bem feito e revisado vale mais do que vários recursos pela metade.' },
-      { t: 'sources', items: [['USMLE Privateers · fontes do Step 1', 'https://www.usmleprivateers.com/usmle-wiki/steps/step-1/resources/ufaps-bb']] },
+      { t: 'p', text: 'Preços em dólar conferidos nos sites oficiais em 16/11/2026. Os marcados com ~ vieram de busca e ainda precisam ser confirmados.' },
+      { t: 'sources', items: [['USMLE Privateers · fontes do Step 1', 'https://www.usmleprivateers.com/usmle-wiki/steps/step-1/resources/ufaps-bb'], ['UWorld', 'https://medical.uworld.com/usmle/usmle-step-1/'], ['AMBOSS', 'https://www.amboss.com/us/pricing'], ['Sketchy', 'https://www.sketchy.com/pricing'], ['AnkiHub', 'https://www.ankihub.net/']] },
     ],
   },
   // ------------------------------------------------------------------
@@ -248,6 +258,7 @@ export const GUIDES = [
       ] },
       { t: 'h', text: 'Simulados do CK' },
       { t: 'p', text: 'NBME (CCSSA), UWSA e Free 120 do Step 2 CK. Preços e como ler o resultado no guia de Simulados.', links: ['simulados'] },
+      { t: 'sources', items: [['UWorld Step 2 CK', 'https://medical.uworld.com/usmle/usmle-step-2-ck/'], ['OnlineMedEd', 'https://onlinemeded.com/pricing'], ['Divine Intervention', 'https://divineinterventionpodcasts.com/']] },
     ],
   },
   // ------------------------------------------------------------------
@@ -256,8 +267,8 @@ export const GUIDES = [
     desc: 'Quais existem, quanto custam e como ler o resultado.',
     blocks: [
       { t: 'resources', items: [
-        { name: 'NBME (CBSSA / CCSSA)', role: 'Oficial', price: 'p_nbme', use: ['Feito por quem faz a prova', 'No Step 1, mostra a chance de passar', 'No Step 2 CK, mostra uma nota estimada'] },
-        { name: 'UWSA', role: 'UWorld', price: 'p_uwsa', use: ['Simulados do UWorld para Step 1 e Step 2 CK', 'Bom para treinar o ritmo'] },
+        { name: 'NBME (CBSSA / CCSSA)', role: 'Oficial', price: 'p_nbme', use: ['Feito por quem faz a prova', '7 simulados de cada (Step 1 e Step 2 CK)', 'No Step 1, mostra a chance de passar', 'No Step 2 CK, mostra uma nota estimada'] },
+        { name: 'UWSA', role: 'UWorld', price: 'p_uwsa', use: ['Simulados do UWorld para Step 1 e Step 2 CK', 'Os três por US$120. Planos do UWorld de 90 dias ou mais já incluem 1 a 3', 'Bom para treinar o ritmo'] },
         { name: 'Free 120', role: 'Oficial e gratuito', price: 'p_free120', use: ['Questões oficiais de amostra, no site do USMLE', 'Costuma ser um dos últimos antes da prova'] },
       ] },
       { t: 'h', text: 'Como a comunidade costuma usar' },
@@ -288,5 +299,12 @@ export const GUIDES = [
   },
 ];
 
-// Preços das fontes e simulados (preenchidos depois da conferência).
-export const PRICES = {};
+// Preços das fontes e simulados, conferidos em 16/11/2026. "~" = valor só de busca, a confirmar.
+export const PRICES = {
+  p_uworld1: 'US$349 a 749', p_uworld2: 'US$349 a 749',
+  p_amboss: 'US$448/ano', p_amboss2: 'US$448/ano',
+  p_fa1: 'US$65', p_fa2: 'US$76',
+  p_pathoma: '~US$85 a 120', p_bb: '~US$149 a 199', p_sketchy: 'US$350 a 650', p_bootcamp: '~US$299/ano',
+  p_anki: 'Grátis · AnkiHub US$6/mês', p_ome: 'US$360/ano', p_divine: 'Podcast grátis',
+  p_nbme: 'US$62 cada', p_uwsa: 'US$50 cada', p_free120: 'Grátis',
+};
