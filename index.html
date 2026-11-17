@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plataforma DM2</title>
+  <meta name="description" content="Protótipo da plataforma da mentoria DM2 · Daily Method (USMLE): aulas, acompanhamento, timeline, guia de provas e visão do admin.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="top" id="top"></header>
+  <nav class="nav" id="nav" hidden aria-label="Principal"></nav>
+  <div class="subnav" id="subnav"></div>
+  <main id="main"></main>
+  <nav class="bottom" id="bottom" aria-label="Menu do celular"></nav>
+  <footer class="foot">
+    <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span>Cada aluno vê só os próprios dados. Os mentores veem todos os alunos.</span>
+    <span>·</span>
+    <span>DM2 não tem vínculo com USMLE, NBME, ECFMG, UWorld ou AMBOSS. Os nomes aparecem só para identificar o recurso usado.</span>
+    <span>·</span>
+    <button type="button" data-act="reset">Restaurar dados fictícios</button>
+  </footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
