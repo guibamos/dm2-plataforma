@@ -20,7 +20,7 @@ function kpis(a) {
     <div class="kpi"><span class="kpi-l">${icon('calendar')} Meta da semana</span><span class="kpi-v">${fmtInt(a.week.q)}<small> de ${fmtInt(a.week.goal)}</small></span>
       <div class="meter"><i style="width:${Math.min(100, goalPct * 100)}%"></i></div></div>
     <div class="kpi"><span class="kpi-l">${icon('flame')} Sequência</span><span class="kpi-v">${a.streak}<small> ${a.streak === 1 ? 'dia' : 'dias'}</small></span>
-      <span class="kpi-d">${a.daysToExam != null ? `prova em <b style="color:var(--ink)">${a.daysToExam} dias</b>` : 'prova sem data'}</span></div>
+      <span class="kpi-d">${a.daysToExam != null ? `prova em <b style="color:var(--ink)">${a.daysToExam} dias</b>` : 'sem data de prova'}</span></div>
   </div>`;
 }
 
@@ -32,7 +32,7 @@ function focusCard(a, who) {
   const habits = a.insights.filter((i) => i.severity !== 'gap');
   const gaps = a.insights.filter((i) => i.severity === 'gap');
   return `<div class="card">
-    <div class="card-h"><div><h2>Onde focar agora</h2><p>Gerado a partir dos registros. Sistema ou matéria com menos de ${MIN_N} questões no período não entra nas lacunas.</p></div></div>
+    <div class="card-h"><div><h2>Onde focar agora</h2><p>Sistema ou matéria com menos de ${MIN_N} questões no período não entra nas lacunas.</p></div></div>
     <div class="focus">
       <div class="focus-col"><h3>Ritmo e hábitos</h3>${habits.map(insightRow).join('')}</div>
       <div class="focus-col"><h3>Lacunas de conteúdo</h3>${gaps.map(insightRow).join('') || `<div class="ins good">${icon('checkCircle')}<div><b>Nenhuma lacuna clara</b><small>Nenhum sistema ou matéria bem abaixo da média ${who === 'mentor' ? 'do aluno' : 'sua'} neste período.</small></div></div>`}</div>
@@ -119,7 +119,7 @@ function matrixCard(a) {
     return `<td style="${color(acc)}" data-tip="${esc(systemShort(s))} × ${esc(subjectShort(j))}\n${fmtPct(acc, 1)} em ${c.q} questões">${Math.round(acc * 100)}</td>`;
   }).join('')}</tr>`).join('');
   return `<div class="card">
-    <div class="card-h"><div><h2>Sistema × matéria</h2><p>Mostra onde exatamente está o buraco (ex.: Farmaco dentro de Cardio). Números = % de acerto. Vermelho abaixo da média, verde acima.</p></div></div>
+    <div class="card-h"><div><h2>Sistema × matéria</h2><p>Números = % de acerto. Vermelho abaixo da média, verde acima.</p></div></div>
     <div class="mx-wrap"><table class="mx"><thead><tr><th></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
     <div class="legend"><span><i style="background:var(--div-neg)"></i>Abaixo da média (${fmtPct(avg)})</span><span><i style="background:var(--div-mid);border:1px solid var(--line-2)"></i>Na média</span><span><i style="background:var(--div-pos)"></i>Acima</span><span>· menos de 10 questões</span></div>
   </div>`;
@@ -144,7 +144,7 @@ function mistakesCard(a) {
 function subtopicsCard(a) {
   const list = a.mistakes.topSubtopics;
   return `<div class="card">
-    <div class="card-h"><div><h2>Subtópicos com mais erros</h2><p>Bons candidatos para revisar no First Aid ou no Pathoma.</p></div></div>
+    <div class="card-h"><div><h2>Subtópicos com mais erros</h2></div></div>
     ${list.length ? `<ul class="subs">${list.map((s) => `<li><span class="cnt">${s.n}</span><span class="tx"><b>${esc(s.subtopic || 'Sem subtópico')}</b><small>${esc(systemShort(s.system))}${s.topType ? ` · mais comum: ${esc(s.topType.label.toLowerCase())}` : ''}</small></span></li>`).join('')}</ul>` : '<div class="empty">Nenhum erro anotado neste período.</div>'}
   </div>`;
 }
@@ -167,7 +167,7 @@ function assessmentsCard(a) {
 function learnedCard(a, who) {
   const list = a.mistakes.recentLearned;
   return `<div class="card">
-    <div class="card-h"><div><h2>${who === 'mentor' ? 'O que o aluno anotou' : 'O que você aprendeu'}</h2><p>As últimas frases do campo "O que aprendi". Bom material para revisar${who === 'mentor' ? ' na reunião' : ''}.</p></div></div>
+    <div class="card-h"><div><h2>${who === 'mentor' ? 'O que o aluno anotou' : 'O que você aprendeu'}</h2><p>As últimas frases do campo "O que aprendi".</p></div></div>
     ${list.length ? `<ul class="learned" style="margin:0;padding:0">${list.map((m) => `<li><small>${fmtDate(m.date)} · ${esc(systemShort(m.system))}${m.subtopic ? ` › ${esc(m.subtopic)}` : ''} · ${esc(mistakeById(m.type)?.label || '')}</small>${esc(m.learned)}</li>`).join('')}</ul>` : '<div class="empty">Nenhuma anotação ainda.</div>'}
   </div>`;
 }
@@ -230,7 +230,7 @@ export function renderStudentDashboard(root, ctx) {
   root.innerHTML = `
     <div class="zone-head">
       <div><span class="eyebrow ana">${icon('sparkles')} Análise automática</span><h1>Meu painel</h1>
-        <p class="sub">Nada para preencher aqui: tudo sai dos seus registros. ${esc(a.settings.exam)}${a.settings.examDate ? ` · prova em ${fmtDate(a.settings.examDate)}` : ''}.</p></div>
+        <p class="sub">${esc(a.settings.exam)}${a.settings.examDate ? ` · prova em ${fmtDate(a.settings.examDate)}` : ' · sem data de prova'}</p></div>
       ${periodFilter()}
     </div>
     ${html}`;

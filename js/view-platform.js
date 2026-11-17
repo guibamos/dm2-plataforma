@@ -1,9 +1,9 @@
-// Áreas novas da plataforma: Início, Aulas, Timeline e Guia de provas.
+// Áreas novas da plataforma: Início, Aulas, Timeline e Guias.
 // O admin vê as mesmas páginas de Aulas e Guia, com o botão Editar.
 
 import { store } from './store.js';
 import { analyze } from './analytics.js';
-import { GUIDE } from './content.js';
+import { GUIDES, PRICES, CHECKED } from './guides.js';
 import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, diffDays } from './util.js';
 import { icon, toast } from './ui.js';
 
@@ -30,7 +30,7 @@ export function renderHome(root, ctx) {
   root.innerHTML = `
     <div class="zone-head">
       <div><h1>Olá, ${esc(first)}</h1>
-        <p class="sub">${esc(fmtDateLong(t))} · ${esc(data.settings.exam)}${a.daysToExam != null ? ` · prova em <b>${a.daysToExam} dias</b>` : ''} · mentor: ${esc(data.mentor ? data.mentor.name : '—')}</p></div>
+        <p class="sub">${esc(fmtDateLong(t))} · ${esc(data.settings.exam)}${a.daysToExam != null ? ` · prova em <b>${a.daysToExam} dias</b>` : ' · sem data de prova'}</p></div>
     </div>
     <div class="grid home-grid">
       <div class="card fill">
@@ -39,7 +39,7 @@ export function renderHome(root, ctx) {
         <div class="actions" style="justify-content:flex-start"><a class="btn btn-fill" href="#registrar">${icon('plus')} Registrar</a><a class="btn btn-ghost" href="#painel">${icon('chart')} Ver meu painel</a></div>
       </div>
       <div class="card">
-        <div class="card-h"><div><h2>Esta semana</h2><p>Atualiza sozinho com os seus registros.</p></div></div>
+        <div class="card-h"><div><h2>Esta semana</h2></div></div>
         <div class="mini-kpis">
           <div><span class="kpi-l">Questões</span><span class="kpi-v">${fmtInt(a.week.q)}<small> de ${fmtInt(a.week.goal)}</small></span><div class="meter"><i style="width:${goalPct}%"></i></div></div>
           <div><span class="kpi-l">Acerto (7 dias)</span><span class="kpi-v">${fmtPct(a.total.acc)}</span></div>
@@ -48,7 +48,7 @@ export function renderHome(root, ctx) {
       </div>
       <div class="card">
         <div class="card-h"><div><h2>Próximo encontro</h2><p>A agenda real entra quando definirmos os encontros.</p></div></div>
-        <div class="meet"><span class="meet-d"><b>qui</b>20h</span><div><b>Individual com ${esc(data.mentor ? data.mentor.name.split(' ')[0] : 'o mentor')}</b><small>30 min · link da chamada aparece aqui</small></div></div>
+        <div class="meet"><span class="meet-d"><b>qui</b>20h</span><div><b>Encontro individual</b><small>30 min · link da chamada aparece aqui</small></div></div>
         <div class="meet"><span class="meet-d"><b>ter</b>20h</span><div><b>Encontro em grupo</b><small>A gravação vai para Aulas depois</small></div></div>
         ${draft('Exemplo')}
       </div>
@@ -58,7 +58,7 @@ export function renderHome(root, ctx) {
         <div class="meter" style="margin-top:12px"><i style="width:${(seen.size / Math.max(1, lessons.length)) * 100}%"></i></div>
       </div>
       <div class="card span-2">
-        <div class="card-h"><div><h2>Onde focar agora</h2><p>Os principais alertas do seu painel nos últimos 7 dias.</p></div><a class="btn btn-ghost btn-sm" href="#painel">Ver painel ${icon('chevron')}</a></div>
+        <div class="card-h"><div><h2>Onde focar agora</h2><p>Últimos 7 dias.</p></div><a class="btn btn-ghost btn-sm" href="#painel">Ver painel ${icon('chevron')}</a></div>
         ${focus.length ? focus.map((i) => `<div class="ins ${i.severity}">${icon(i.severity === 'gap' ? 'target' : i.severity === 'critical' ? 'alertCircle' : i.severity === 'info' ? 'info' : 'alert')}<div><b>${esc(i.title)}</b><small>${esc(i.detail)}</small></div></div>`).join('') : `<div class="ins good">${icon('checkCircle')}<div><b>Tudo no ritmo</b><small>Nenhum alerta nos últimos 7 dias.</small></div></div>`}
       </div>
     </div>`;
@@ -154,30 +154,70 @@ export function renderTimeline(root, ctx) {
     { date: s.startDate, title: 'Início da mentoria', kind: 'start' },
     ...data.assessments.map((x) => ({ date: x.date, title: `${x.kind} ${x.name}`, detail: `${fmtPct(x.pct)} de acerto`, kind: 'sim' })),
     { date: t, title: 'Hoje', kind: 'today' },
-    ...(s.examDate ? [{ date: s.examDate, title: s.exam, detail: `faltam ${diffDays(s.examDate, t)} dias`, kind: 'exam' }] : []),
+    ...(s.examDate ? [{ date: s.examDate, title: s.exam, detail: `faltam ${diffDays(s.examDate, t)} dias`, kind: 'exam' }] : [{ date: '9999-12-31', nodate: true, title: s.exam, detail: 'Sem data marcada', kind: 'exam' }]),
   ].sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
   root.innerHTML = `
-    <div class="zone-head"><div><h1>Minha timeline</h1><p class="sub">Os marcos do seu caminho até a prova.</p></div></div>
+    <div class="zone-head"><div><h1>Minha timeline</h1></div></div>
     <div class="privacy" style="margin-bottom:16px">${icon('info')}<div><b>Rascunho.</b> A timeline ainda vai ser desenhada numa conversa própria. Por enquanto, mostra só datas que já existem no sistema: início, simulados, hoje e prova.</div></div>
     <div class="card"><ol class="tl">
-      ${evs.map((e) => `<li class="tl-${e.kind} ${e.date > t ? 'future' : ''}"><span class="tl-dot"></span><span class="tl-date">${fmtDate(e.date)}</span><div><b>${esc(e.title)}</b>${e.detail ? `<small>${esc(e.detail)}</small>` : ''}</div></li>`).join('')}
+      ${evs.map((e) => `<li class="tl-${e.kind} ${e.date > t ? 'future' : ''}"><span class="tl-dot"></span><span class="tl-date">${e.nodate ? '—' : fmtDate(e.date)}</span><div><b>${esc(e.title)}</b>${e.detail ? `<small>${esc(e.detail)}</small>` : ''}</div></li>`).join('')}
     </ol></div>`;
   noHandlers(root);
 }
 
-// ---------------- Guia de provas ----------------
-export function renderGuide(root, ctx) {
+// ---------------- Guias ----------------
+const tones = { info: 'info', warning: 'alert', good: 'checkCircle' };
+const guideLink = (id) => { const g = GUIDES.find((x) => x.id === id); return g ? `<a class="g-chip" href="#guia-${g.id}">${icon(g.icon)}${esc(g.title)}</a>` : ''; };
+const price = (key) => (PRICES[key] ? esc(PRICES[key]) : 'preço a conferir');
+
+function block(b) {
+  switch (b.t) {
+    case 'h': return `<h2 class="g-h" id="${esc(slug(b.text))}">${esc(b.text)}</h2>`;
+    case 'p': return `<p class="g-p">${esc(b.text)}</p>${b.links ? `<div class="g-chips">${b.links.map(guideLink).join('')}</div>` : ''}`;
+    case 'steps': return `<ol class="g-steps">${b.items.map((it) => `<li><div><b>${esc(it.title)}</b>${it.text ? `<p>${esc(it.text)}</p>` : ''}${it.bullets ? `<ul>${it.bullets.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${it.link ? `<div class="g-chips">${guideLink(it.link)}</div>` : ''}</div></li>`).join('')}</ol>`;
+    case 'cards': return `<div class="g-cards ${b.wide ? 'wide' : ''}">${b.items.map((c) => `<div class="g-card"><span class="g-card-t">${esc(c.title)}</span>${c.value ? `<span class="g-card-v">${esc(c.value)}</span>` : ''}${c.text ? `<p>${esc(c.text)}</p>` : ''}${c.list ? `<ul>${c.list.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}</div>`).join('')}</div>`;
+    case 'total': return `<div class="g-total"><div><span class="g-card-t">${esc(b.label)}</span><p>${esc(b.text)}</p></div><span class="g-total-v">${esc(b.value)}</span></div>`;
+    case 'table': return `<div class="t-wrap g-table"><table class="t"><thead><tr>${b.head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${b.rows.map((r) => `<tr>${r.map((c, i) => `<td${i ? '' : ' class="g-first"'}>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${b.note ? `<p class="g-note">${esc(b.note)}</p>` : ''}`;
+    case 'alert': return `<div class="ins ${b.tone === 'warning' ? 'warning' : b.tone === 'good' ? 'good' : 'info'} g-alert">${icon(tones[b.tone] || 'info')}<div><b>${esc(b.title)}</b><small>${esc(b.text)}</small></div></div>`;
+    case 'list': return `<ul class="g-list">${b.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+    case 'terms': return `<div class="g-terms">${b.items.map(([k, full, d]) => `<div class="g-term"><span class="g-term-k">${esc(k)}</span><div>${full !== k ? `<b>${esc(full)}</b>` : ''}<p>${esc(d)}</p></div></div>`).join('')}</div>`;
+    case 'resources': return `<div class="g-res">${b.items.map((r) => `<div class="g-res-card"><div class="g-res-h"><div><b>${esc(r.name)}</b><span class="g-role">${esc(r.role)}</span></div><span class="g-price">${price(r.price)}</span></div><ul>${r.use.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>`;
+    case 'links': return `<div class="g-links">${b.items.map(([name, url, d]) => `<a class="g-link" href="${esc(url)}" target="_blank" rel="noopener"><span><b>${esc(name)}</b><small>${esc(d)}</small></span>${icon('external')}</a>`).join('')}</div>`;
+    case 'sources': return `<div class="g-sources"><span>Fontes${b.checked ? ` · valores conferidos em ${CHECKED}` : ''}:</span> ${b.items.map(([l, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join(' · ')}</div>`;
+    default: return '';
+  }
+}
+const slug = (t) => 'g-' + t.toLowerCase().normalize('NFD').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
+
+export function renderGuide(root, ctx, id) {
   const admin = ctx.admin;
+  const g = id && GUIDES.find((x) => x.id === id);
+  if (!g) {
+    root.innerHTML = `
+      <div class="zone-head"><div><h1>Guias</h1></div></div>
+      <div class="g-index">${GUIDES.map((x) => `<a class="g-index-card" href="#guia-${x.id}"><span class="guide-ic">${icon(x.icon)}</span><span><b>${esc(x.title)}</b><small>${esc(x.desc)}</small></span>${icon('chevron')}</a>`).join('')}</div>
+      <p class="small muted" style="margin-top:16px">A DM2 não tem vínculo com USMLE, NBME, ECFMG, FSMB, UWorld ou AMBOSS. Os guias só informam onde encontrar cada coisa.</p>`;
+    root.onclick = root.oninput = root.onchange = root.onsubmit = null;
+    return;
+  }
+  const i = GUIDES.indexOf(g);
+  const heads = g.blocks.filter((b) => b.t === 'h');
   root.innerHTML = `
-    <div class="zone-head"><div><h1>Guia de provas</h1><p class="sub">Fontes, simulados, custos e tudo o que ajuda a planejar.</p></div></div>
-    <div class="privacy" style="margin-bottom:16px">${icon('info')}<div><b>Estrutura provisória.</b> O conteúdo de cada seção ainda vai ser definido. A DM2 não tem vínculo com USMLE, NBME, ECFMG, UWorld ou AMBOSS: o guia só informa onde encontrar cada coisa.</div></div>
-    <div class="grid g-2">
-      ${GUIDE.map((g) => `<div class="card">
-        <div class="card-h"><div style="display:flex;gap:12px;align-items:flex-start"><span class="guide-ic">${icon(g.icon)}</span><div><h2>${esc(g.title)}</h2><p>${esc(g.desc)}</p></div></div>
-          ${admin ? `<button class="btn btn-ghost btn-sm" data-edit-guide="${g.id}">${icon('pencil')} Editar</button>` : ''}</div>
-        <ul class="guide-list">${g.items.map((it) => `<li><span>${esc(it)}</span><small>a definir</small></li>`).join('')}</ul>
-      </div>`).join('')}
+    <a class="back" href="#guia">${icon('arrowLeft')} Guias</a>
+    <div class="g-layout">
+      <article class="g-article">
+        <div class="zone-head" style="margin-bottom:8px"><div style="display:flex;gap:14px;align-items:center"><span class="guide-ic lg">${icon(g.icon)}</span><div><h1 style="margin:0">${esc(g.title)}</h1><p class="sub">${esc(g.desc)}</p></div></div>
+          ${admin ? `<button class="btn btn-ghost btn-sm" data-edit-guide="1">${icon('pencil')} Editar</button>` : ''}</div>
+        ${heads.length > 1 ? `<div class="g-toc">${heads.map((h) => `<button type="button" data-goto="${esc(slug(h.text))}">${esc(h.text)}</button>`).join('')}</div>` : ''}
+        ${g.blocks.map(block).join('')}
+        <div class="lesson-nav">${GUIDES[i - 1] ? `<a class="btn btn-ghost" href="#guia-${GUIDES[i - 1].id}">${icon('arrowLeft')} ${esc(GUIDES[i - 1].title)}</a>` : '<span></span>'}${GUIDES[i + 1] ? `<a class="btn btn-ghost" href="#guia-${GUIDES[i + 1].id}">${esc(GUIDES[i + 1].title)} ${icon('chevron')}</a>` : ''}</div>
+      </article>
+      <aside class="card g-side">${GUIDES.map((x) => `<a class="side-row ${x.id === g.id ? 'on' : ''}" href="#guia-${x.id}">${esc(x.title)}</a>`).join('')}</aside>
     </div>`;
-  root.onclick = (e) => { if (e.target.closest('[data-edit-guide]')) toast('A edição do guia entra quando definirmos o conteúdo'); };
+  root.onclick = (e) => {
+    const t = e.target.closest('[data-goto]');
+    if (t) { document.getElementById(t.dataset.goto)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (e.target.closest('[data-edit-guide]')) toast('A edição dos guias entra na versão real');
+  };
   root.oninput = root.onchange = root.onsubmit = null;
 }

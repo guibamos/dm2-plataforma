@@ -1,4 +1,4 @@
-// Visão do mentor: lista dos alunos dele e o painel de cada um (só leitura).
+// Visão dos mentores: todos os alunos e o painel de cada um (só leitura).
 
 import { store } from './store.js';
 import { analyze } from './analytics.js';
@@ -35,7 +35,7 @@ export function renderRoster(root, ctx) {
       ${rows.map(({ u, a, dots, lastSim }) => {
         const top = a.insights.find((i) => i.severity === 'critical' || i.severity === 'warning');
         return `<a class="stu" href="#aluno-${u.id}">
-          <span class="stu-name"><span class="avatar">${initials(u.name)}</span><span style="min-width:0"><b>${esc(u.name)}</b><small>${esc(store.mentorName(u.mentorId).split(' ')[0])} · ${esc(a.settings.exam)} · ${a.daysToExam != null ? `prova em ${a.daysToExam} dias` : 'sem data'}${lastSim ? ` · último simulado ${fmtPct(lastSim.pct)}` : ''}</small></span></span>
+          <span class="stu-name"><span class="avatar">${initials(u.name)}</span><span style="min-width:0"><b>${esc(u.name)}</b><small>${esc(a.settings.exam)} · ${a.daysToExam != null ? `prova em ${a.daysToExam} dias` : 'sem data de prova'}${lastSim ? ` · último simulado ${fmtPct(lastSim.pct)}` : ''}</small></span></span>
           <span>${statusChip(a.status)}${top ? `<small class="muted" style="display:block;font-size:11px;margin-top:4px;line-height:1.3">${esc(top.title)}</small>` : ''}</span>
           <span class="stu-m"><small>Último registro</small><b>${a.daysSinceAny == null ? '—' : a.daysSinceAny === 0 ? 'hoje' : a.daysSinceAny === 1 ? 'ontem' : `há ${a.daysSinceAny} dias`}</b></span>
           <span class="stu-m"><small>Questões 7 dias</small><b>${fmtInt(a.total.q)}</b></span>
@@ -74,9 +74,9 @@ export function renderMentorStudent(root, ctx, studentId) {
     </div>
     <div class="grid g-2" style="margin-bottom:16px">
       <div class="card">
-        <div class="card-h"><div><h2>Combinado</h2><p>Definido com o aluno no primeiro dia.</p></div></div>
+        <div class="card-h"><div><h2>Combinado</h2></div></div>
         <table class="t"><tbody>
-          <tr><td class="muted">Prova</td><td><b>${esc(s.exam)}</b>${s.examDate ? ` · ${fmtDate(s.examDate)} (${diffDays(s.examDate, today())} dias)` : ' · sem data'}</td></tr>
+          <tr><td class="muted">Prova</td><td><b>${esc(s.exam)}</b>${s.examDate ? ` · ${fmtDate(s.examDate)} (${diffDays(s.examDate, today())} dias)` : ' · sem data marcada'}</td></tr>
           <tr><td class="muted">Início</td><td>${fmtDate(s.startDate)} · semana ${a.weeks.length}</td></tr>
           <tr><td class="muted">Meta semanal</td><td>${fmtInt(s.weeklyGoal)} questões · Anki ${s.ankiGoal} dias</td></tr>
           <tr><td class="muted">Último simulado</td><td>${lastSim ? `${esc(lastSim.kind)} ${esc(lastSim.name)} · <b>${fmtPct(lastSim.pct)}</b> em ${fmtDate(lastSim.date)}` : 'nenhum'}</td></tr>
@@ -84,7 +84,7 @@ export function renderMentorStudent(root, ctx, studentId) {
         </tbody></table>
       </div>
       <div class="card fill">
-        <div class="card-h"><div><span class="eyebrow fill">${icon('pencil')} Você preenche</span><h2 style="margin-top:4px">Notas da mentoria</h2><p>Só os mentores veem. O aluno não tem acesso. Mentor responsável: ${esc(store.mentorName(u.mentorId))}.</p></div></div>
+        <div class="card-h"><div><span class="eyebrow fill">${icon('pencil')} Você preenche</span><h2 style="margin-top:4px">Notas da mentoria</h2><p>Só os mentores veem. O aluno não tem acesso.</p></div></div>
         <form class="form" data-form="note" style="gap:10px">
           <textarea class="input" name="text" rows="2" placeholder="ex.: Combinamos revisar Renal antes do próximo simulado." required></textarea>
           <div class="actions"><span></span><button class="btn btn-fill btn-sm" type="submit">${icon('check')} Salvar nota</button></div>

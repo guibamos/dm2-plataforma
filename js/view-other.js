@@ -3,7 +3,7 @@
 import { store } from './store.js';
 import { MIXED, systemShort, subjectShort, mistakeById } from './lists.js';
 import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, addDays, sum, groupBy } from './util.js';
-import { icon, toast, initials } from './ui.js';
+import { icon, toast, initials, examDateField } from './ui.js';
 
 const H = { days: 21 };
 
@@ -31,7 +31,7 @@ export function renderHistory(root, ctx) {
   }
   root.innerHTML = `
     <div class="zone-head">
-      <div><span class="eyebrow fill">${icon('clock')} Seus registros</span><h1>Histórico</h1><p class="sub">Esqueceu de registrar um dia? Clique em Editar para completar.</p></div>
+      <div><span class="eyebrow fill">${icon('clock')} Seus registros</span><h1>Histórico</h1><p class="sub">Para completar um dia, clique em Editar.</p></div>
     </div>
     <div class="card"><div class="t-wrap"><table class="t">
       <thead><tr><th>Dia</th><th class="r">Questões</th><th class="r">Acerto</th><th>Blocos</th><th class="r">Anki</th><th class="r">Erros</th><th></th></tr></thead>
@@ -55,8 +55,8 @@ export function renderSettings(root, ctx) {
       <form class="form" data-form="settings">
         <div class="row">
           <label class="field"><span>Prova</span><select class="input" name="exam"><option ${s.exam === 'Step 1' ? 'selected' : ''}>Step 1</option><option ${s.exam === 'Step 2 CK' ? 'selected' : ''}>Step 2 CK</option></select></label>
-          <label class="field"><span>Data da prova <em>(se já marcou)</em></span><input class="input" type="date" name="examDate" value="${s.examDate || ''}"></label>
         </div>
+        ${examDateField(s.examDate)}
         <div class="row">
           <label class="field"><span>Início da mentoria</span><input class="input" type="date" name="startDate" value="${s.startDate}" required></label>
           <label class="field"><span>Meta semanal de questões</span><input class="input" type="number" min="0" step="10" name="weeklyGoal" value="${s.weeklyGoal}"></label>

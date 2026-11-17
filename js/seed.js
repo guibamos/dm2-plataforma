@@ -5,19 +5,19 @@ import { SYSTEMS, SUBJECTS, MISTAKES, ASSESSMENTS, MIXED } from './lists.js';
 import { today, addDays, mondayOf, rng, uid } from './util.js';
 
 const PROFILES = [
-  { id: 'ana', name: 'Ana Lima', mentorId: 'gabriel', exam: 'Step 1', weeks: 9, examIn: 95, base: 0.58, trend: 0.012, perDay: 40, skip: 0.06, anki: 0.95,
+  { id: 'ana', name: 'Ana Lima', exam: 'Step 1', weeks: 9, examIn: 95, base: 0.58, trend: 0.012, perDay: 40, skip: 0.06, anki: 0.95,
     weak: ['Renal, Urinary Systems & Electrolytes', 'Biochemistry (General Principles)'], strongSubj: ['Physiology'], weakSubj: ['Biochemistry'], mix: [3, 2, 1, 2, 2, 1] },
-  { id: 'bruno', name: 'Bruno Costa', mentorId: 'gabriel', exam: 'Step 1', weeks: 8, examIn: 120, base: 0.55, trend: 0.004, perDay: 30, skip: 0.2, anki: 0.55, stopped: 5,
+  { id: 'bruno', name: 'Bruno Costa', exam: 'Step 1', weeks: 8, examIn: null, base: 0.55, trend: 0.004, perDay: 30, skip: 0.2, anki: 0.55, stopped: 5,
     weak: ['Pharmacology (General Principles)', 'Microbiology (General Principles)'], strongSubj: ['Pathology'], weakSubj: ['Pharmacology', 'Microbiology'], mix: [2, 5, 1, 1, 1, 2] },
-  { id: 'carla', name: 'Carla Mendes', mentorId: 'gabriel', exam: 'Step 1', weeks: 6, examIn: 70, base: 0.68, trend: -0.022, perDay: 60, skip: 0.04, anki: 0.85,
+  { id: 'carla', name: 'Carla Mendes', exam: 'Step 1', weeks: 6, examIn: 70, base: 0.68, trend: -0.022, perDay: 60, skip: 0.04, anki: 0.85,
     weak: ['Nervous System', 'Cardiovascular System'], strongSubj: ['Microbiology'], weakSubj: ['Anatomy'], mix: [1, 1, 4, 2, 2, 3] },
-  { id: 'diego', name: 'Diego Rocha', mentorId: 'gabriel', exam: 'Step 2 CK', weeks: 10, examIn: 30, base: 0.64, trend: 0.009, perDay: 80, skip: 0.05, anki: 0.9, random: true,
+  { id: 'diego', name: 'Diego Rocha', exam: 'Step 2 CK', weeks: 10, examIn: 30, base: 0.64, trend: 0.009, perDay: 80, skip: 0.05, anki: 0.9, random: true,
     weak: ['Pregnancy, Childbirth & Puerperium', 'Psychiatric/Behavioral & Substance Use Disorder'], strongSubj: ['Medicine'], weakSubj: ['Obstetrics & Gynecology'], mix: [2, 1, 2, 3, 3, 1] },
-  { id: 'elisa', name: 'Elisa Torres', mentorId: 'mateus', exam: 'Step 1', weeks: 7, examIn: 110, base: 0.6, trend: 0.008, perDay: 45, skip: 0.08, anki: 0.92,
+  { id: 'elisa', name: 'Elisa Torres', exam: 'Step 1', weeks: 7, examIn: null, base: 0.6, trend: 0.008, perDay: 45, skip: 0.08, anki: 0.92,
     weak: ['Hematology & Oncology', 'Genetics (General Principles)'], strongSubj: ['Physiology'], weakSubj: ['Genetics'], mix: [3, 2, 1, 1, 2, 1] },
-  { id: 'felipe', name: 'Felipe Nunes', mentorId: 'mateus', exam: 'Step 1', weeks: 3, examIn: 160, base: 0.54, trend: 0.01, perDay: 20, skip: 0.3, anki: 0.7,
+  { id: 'felipe', name: 'Felipe Nunes', exam: 'Step 1', weeks: 3, examIn: null, base: 0.54, trend: 0.01, perDay: 20, skip: 0.3, anki: 0.7,
     weak: ['Infectious Diseases'], strongSubj: ['Anatomy'], weakSubj: ['Microbiology'], mix: [4, 1, 1, 1, 1, 1] },
-  { id: 'gabriela', name: 'Gabriela Prado', mentorId: 'mateus', exam: 'Step 2 CK', weeks: 9, examIn: 50, base: 0.7, trend: 0.005, perDay: 70, skip: 0.07, anki: 0.88, random: true,
+  { id: 'gabriela', name: 'Gabriela Prado', exam: 'Step 2 CK', weeks: 9, examIn: 50, base: 0.7, trend: 0.005, perDay: 70, skip: 0.07, anki: 0.88, random: true,
     weak: ['Pulmonary & Critical Care'], strongSubj: ['Pediatrics'], weakSubj: ['Surgery'], mix: [1, 2, 2, 2, 3, 2] },
 ];
 
@@ -50,9 +50,9 @@ export function buildSeed() {
 
   PROFILES.forEach((p, pi) => {
     const r = rng(1000 + pi * 97);
-    users.push({ id: p.id, name: p.name, role: 'student', mentorId: p.mentorId });
+    users.push({ id: p.id, name: p.name, role: 'student' });
     const start = addDays(mondayOf(t), -7 * (p.weeks - 1));
-    db.settings[p.id] = { exam: p.exam, startDate: start, examDate: addDays(t, p.examIn), weeklyGoal: Math.round(p.perDay * 6 / 10) * 10, ankiGoal: 7 };
+    db.settings[p.id] = { exam: p.exam, startDate: start, examDate: p.examIn == null ? null : addDays(t, p.examIn), weeklyGoal: Math.round(p.perDay * 6 / 10) * 10, ankiGoal: 7 };
     const subjects = SUBJECTS[p.exam];
     const lastDay = p.stopped ? addDays(t, -p.stopped) : addDays(t, -1);
     const mixTotal = p.mix.reduce((a, b) => a + b, 0);

@@ -8,7 +8,7 @@ import { uid, today } from './util.js';
 import { buildSeed } from './seed.js';
 import { MODULES_SEED, WATCHED_SEED } from './content.js';
 
-const KEY = 'dm2-plataforma-v1';
+const KEY = 'dm2-plataforma-v3';
 const VIEWAS = 'dm2-viewas';
 const SESSION = 'dm2-session';
 const STUDENT_TABLES = ['blocks', 'anki', 'mistakes', 'assessments'];
@@ -34,7 +34,7 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (
 class AccessDenied extends Error { constructor() { super('Sem permissão para estes dados.'); } }
 
 export const store = {
-  users: () => db.users.map(({ id, name, role, mentorId }) => ({ id, name, role, mentorId })),
+  users: () => db.users.map(({ id, name, role }) => ({ id, name, role })),
 
   // Quem entrou de verdade (admin ou aluno).
   realMe() {
@@ -72,13 +72,12 @@ export const store = {
     return db.users.filter((u) => u.role === 'student');
   },
   mentors() { return db.users.filter((u) => u.role === 'mentor'); },
-  mentorName(id) { return (db.users.find((u) => u.id === id) || {}).name || '—'; },
 
   // Cadastro de aluno pelo admin.
-  addStudent({ name, email, mentorId, exam, examDate }) {
+  addStudent({ name, email, exam, examDate }) {
     if (!this.isAdmin()) throw new AccessDenied();
     const id = uid();
-    db.users.push({ id, name, email, role: 'student', mentorId });
+    db.users.push({ id, name, email, role: 'student' });
     db.settings[id] = { exam, startDate: today(), examDate: examDate || null, weeklyGoal: 200, ankiGoal: 7 };
     save();
     return id;
@@ -115,12 +114,10 @@ export const store = {
   student(studentId) {
     if (!this.canRead(studentId)) throw new AccessDenied();
     const u = db.users.find((x) => x.id === studentId);
-    const mentor = db.users.find((x) => x.id === u.mentorId);
     const pick = (t) => db[t].filter((r) => r.studentId === studentId);
     const me = this.me();
     return {
       user: u,
-      mentor,
       settings: db.settings[studentId],
       blocks: pick('blocks'),
       anki: pick('anki'),

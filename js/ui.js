@@ -90,6 +90,24 @@ export function installTooltips() {
   document.addEventListener('scroll', () => tip.classList.remove('on'), true);
 }
 
+// Data da prova: nem todo aluno tem prova marcada.
+export const examDateField = (value) => `<div class="field exam-date"><span>Data da prova</span>
+  <div class="seg" role="group" aria-label="Data da prova">
+    <button type="button" data-hasdate="0" class="${value ? '' : 'on'}">Ainda sem data</button>
+    <button type="button" data-hasdate="1" class="${value ? 'on' : ''}">Já tenho data</button>
+  </div>
+  <input class="input" type="date" name="examDate" value="${value || ''}" aria-label="Data da prova" ${value ? '' : 'hidden'}>
+</div>`;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-hasdate]');
+  if (!b) return;
+  const box = b.closest('.exam-date');
+  box.querySelectorAll('[data-hasdate]').forEach((x) => x.classList.toggle('on', x === b));
+  const input = box.querySelector('input[name="examDate"]');
+  input.hidden = b.dataset.hasdate === '0';
+  if (input.hidden) input.value = ''; else input.focus();
+});
+
 export const deltaHtml = (v, suffix = '') => {
   if (v == null) return '';
   const pts = Math.round(v * 1000) / 10;

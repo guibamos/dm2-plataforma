@@ -40,7 +40,7 @@ function tabDia(data) {
   return `
   <form class="form" data-form="block" autocomplete="off">
     <div class="card-h" style="margin:0">
-      <div><h2>${icon('book')} Bloco de questões</h2><p>Um registro por bloco. Fez dois blocos? Salve duas vezes.</p></div>
+      <div><h2>${icon('book')} Bloco de questões</h2><p>Um registro por bloco.</p></div>
     </div>
     <div class="row keep">
       <label class="field"><span>Questões</span>${stepper('questions', b.questions, 5)}</label>
@@ -162,7 +162,6 @@ export function renderRegister(root, ctx) {
     <div>
       <span class="eyebrow fill">${icon('pencil')} Você preenche</span>
       <h1>Registro do dia</h1>
-      <p class="sub">Uns 15 segundos por bloco. O painel faz as contas sozinho.</p>
     </div>
     <div class="today-strip">
       <span class="pill ${todayQ ? 'ok' : 'no'}">${icon('book')} ${todayQ ? `${todayQ} questões hoje` : 'Sem questões hoje'}</span>

@@ -18,8 +18,8 @@ const $main = document.getElementById('main');
 const $bottom = document.getElementById('bottom');
 
 const ACOMP = ['registrar', 'painel', 'historico', 'ajustes'];
-const STUDENT_PAGES = ['inicio', 'aulas', 'aula', 'timeline', 'guia', ...ACOMP];
-const ADMIN_PAGES = ['geral', 'alunos', 'aluno', 'aulas', 'aula', 'guia', 'crm', 'acervo', 'config'];
+const STUDENT_PAGES = ['inicio', 'aulas', 'aula', 'timeline', 'guia', 'guiapage', ...ACOMP];
+const ADMIN_PAGES = ['geral', 'alunos', 'aluno', 'aulas', 'aula', 'guia', 'guiapage', 'crm', 'acervo', 'config'];
 
 // [rota, rótulo, ícone, rotas que deixam a aba ativa]
 const STUDENT_TABS = [
@@ -27,13 +27,13 @@ const STUDENT_TABS = [
   ['aulas', 'Aulas', 'play', ['aulas', 'aula']],
   ['registrar', 'Acompanhamento', 'chart', ACOMP],
   ['timeline', 'Timeline', 'route', ['timeline']],
-  ['guia', 'Guia de provas', 'compass', ['guia']],
+  ['guia', 'Guias', 'compass', ['guia', 'guiapage']],
 ];
 const ADMIN_TABS = [
   ['geral', 'Painel geral', 'grid', ['geral']],
   ['alunos', 'Alunos', 'users', ['alunos', 'aluno']],
   ['aulas', 'Aulas', 'play', ['aulas', 'aula']],
-  ['guia', 'Guia de provas', 'compass', ['guia']],
+  ['guia', 'Guias', 'compass', ['guia', 'guiapage']],
   ['crm', 'CRM', 'funnel', ['crm']],
   ['acervo', 'Acervo', 'bookmark', ['acervo']],
   ['config', 'Configurações', 'gear', ['config']],
@@ -79,8 +79,8 @@ function frame(real, me, page) {
     ? [['inicio', 'Início', 'home', ['inicio']], ['aulas', 'Aulas', 'play', ['aulas', 'aula']], ['registrar', 'Registrar', 'plus', ['registrar'], 'reg'], ['painel', 'Painel', 'chart', ['painel']]]
     : [['geral', 'Geral', 'grid', ['geral']], ['alunos', 'Alunos', 'users', ['alunos', 'aluno']], ['aulas', 'Aulas', 'play', ['aulas', 'aula']]];
   const more = asStudent
-    ? [['timeline', 'Timeline', 'route'], ['guia', 'Guia de provas', 'compass'], ['historico', 'Histórico', 'clock'], ['ajustes', 'Ajustes', 'sliders']]
-    : [['guia', 'Guia de provas', 'compass'], ['crm', 'CRM', 'funnel'], ['acervo', 'Acervo', 'bookmark'], ['config', 'Configurações', 'gear']];
+    ? [['timeline', 'Timeline', 'route'], ['guia', 'Guias', 'compass'], ['historico', 'Histórico', 'clock'], ['ajustes', 'Ajustes', 'sliders']]
+    : [['guia', 'Guias', 'compass'], ['crm', 'CRM', 'funnel'], ['acervo', 'Acervo', 'bookmark'], ['config', 'Configurações', 'gear']];
   const moreOn = more.some(([r]) => r === page);
   $bottom.innerHTML = `${bar.map(([r, label, ic, match, cls]) => `<a href="#${r}" class="${cls || ''} ${match.includes(page) ? 'on' : ''}">${icon(ic)}<span>${label}</span></a>`).join('')}
     <button type="button" data-act="more" class="${moreOn || moreOpen ? 'on' : ''}" aria-expanded="${moreOpen}">${icon('menu')}<span>Mais</span></button>
@@ -95,11 +95,11 @@ function render() {
   let route = location.hash.replace(/^#/, '');
   if (!real) route = 'entrar';
   const asStudent = me && me.role === 'student';
-  let page = route.startsWith('aluno-') ? 'aluno' : route.startsWith('aula-') ? 'aula' : route;
+  let page = route.startsWith('aluno-') ? 'aluno' : route.startsWith('aula-') ? 'aula' : route.startsWith('guia-') ? 'guiapage' : route;
   if (real && (!page || page === 'entrar' || !(asStudent ? STUDENT_PAGES : ADMIN_PAGES).includes(page))) {
     route = page = asStudent ? 'inicio' : 'geral';
   }
-  const arg = page === 'aluno' ? route.slice(6) : page === 'aula' ? route.slice(5) : null;
+  const arg = page === 'aluno' ? route.slice(6) : page === 'aula' ? route.slice(5) : page === 'guiapage' ? route.slice(5) : null;
   frame(real, me, page);
   document.body.classList.toggle('has-sub', !!$sub.innerHTML);
 
@@ -116,7 +116,7 @@ function render() {
     if (page === 'aulas') return renderLessons($main, ctx);
     if (page === 'aula') return renderLesson($main, ctx, arg);
     if (page === 'timeline') return renderTimeline($main, ctx);
-    if (page === 'guia') return renderGuide($main, ctx);
+    if (page === 'guia' || page === 'guiapage') return renderGuide($main, ctx, arg);
     if (page === 'painel') return renderStudentDashboard($main, ctx);
     if (page === 'historico') return renderHistory($main, ctx);
     if (page === 'ajustes') return renderSettings($main, ctx);
@@ -126,7 +126,7 @@ function render() {
   if (page === 'alunos') return renderStudents($main, ctx);
   if (page === 'aulas') return renderLessons($main, ctx);
   if (page === 'aula') return renderLesson($main, ctx, arg);
-  if (page === 'guia') return renderGuide($main, ctx);
+  if (page === 'guia' || page === 'guiapage') return renderGuide($main, ctx, arg);
   if (page === 'crm') return renderCrm($main, ctx);
   if (page === 'acervo') return renderAcervo($main, ctx);
   if (page === 'config') return renderConfig($main, ctx);

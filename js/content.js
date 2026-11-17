@@ -28,12 +28,4 @@ export const MODULES_SEED = [
 
 export const WATCHED_SEED = { ana: ['l1', 'l2', 'l3', 'l4'], carla: ['l1', 'l2'], diego: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6'], elisa: ['l1'], gabriela: ['l1', 'l2', 'l3'] };
 
-// Guia de provas: só a estrutura. O conteúdo ainda vai ser definido.
-export const GUIDE = [
-  { id: 'provas', icon: 'flag', title: 'As provas', desc: 'Step 1 e Step 2 CK: formato, duração, como marcar e o que muda entre elas.', items: ['Step 1', 'Step 2 CK', 'Como marcar a prova'] },
-  { id: 'simulados', icon: 'target', title: 'Simulados', desc: 'Quais existem, quando fazer e como interpretar cada um.', items: ['NBME', 'UWSA', 'Free 120'] },
-  { id: 'custos', icon: 'wallet', title: 'Custos', desc: 'Quanto custa cada etapa: inscrição, bancos de questões e simulados.', items: ['Inscrição e taxas', 'Bancos de questões', 'Simulados'] },
-  { id: 'fontes', icon: 'book', title: 'Fontes e recursos', desc: 'Os materiais padrão-ouro e para que serve cada um.', items: ['UWorld', 'Anki · AnKing', 'First Aid, Pathoma, Sketchy, Boards & Beyond'] },
-];
-
 export const ACERVO_URL = 'https://claude.ai/artifact/PkrZYdxzQhajU31jRTVnBo';
