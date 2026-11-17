@@ -1,7 +1,7 @@
 // Gráficos de linha e coluna (Chart.js). As cores vêm das variáveis do CSS,
 // então claro e escuro funcionam sem duplicar nada.
 
-import { fmtPct, fmtInt, fmtDate } from './util.js?v=202611162334';
+import { fmtPct, fmtInt, fmtDate } from './util.js?v=202611162357';
 
 const live = new Set();
 export function destroyCharts() { for (const c of live) c.destroy(); live.clear(); }

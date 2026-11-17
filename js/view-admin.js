@@ -1,10 +1,10 @@
 // Áreas só do admin: Alunos (lista, grupos e cadastro), CRM, Acervo e Configurações.
 
-import { store } from './store.js?v=202611162334';
-import { analyze } from './analytics.js?v=202611162334';
-import { ACERVO_URL } from './content.js?v=202611162334';
-import { fmtPct, fmtInt, fmtDate, esc } from './util.js?v=202611162334';
-import { icon, statusChip, initials, toast, examDateField } from './ui.js?v=202611162334';
+import { store } from './store.js?v=202611162357';
+import { analyze } from './analytics.js?v=202611162357';
+import { ACERVO_URL } from './content.js?v=202611162357';
+import { fmtPct, fmtInt, fmtDate, esc } from './util.js?v=202611162357';
+import { icon, statusChip, initials, toast, examDateField } from './ui.js?v=202611162357';
 
 const F = { q: '', exam: '', view: 'lista', group: 'exam', adding: false };
 const noHandlers = (root) => { root.onclick = root.oninput = root.onchange = root.onsubmit = null; };
@@ -127,6 +127,40 @@ const sortKey = (r) => { const k = String(r.data || '').replace(/^~/, ''); retur
 const safeUrl = (u) => (/^https:\/\//i.test(u || '') ? u : '#');
 function edits() { try { return JSON.parse(localStorage.getItem(EDITS) || '{}'); } catch (e) { return {}; } }
 function saveEdit(id, patch) { const e = edits(); e[id] = { ...(e[id] || {}), ...patch }; try { localStorage.setItem(EDITS, JSON.stringify(e)); } catch (err) { /* ignora */ } }
+// Capas: imagem solta em capas/<código>.jpg, ou num pacote por perfil (capas/pack-<perfil>.json).
+const PACKS = new Set(['lisravani', 'liviaromariz', 'matheusarraes', 'mitre.lucas']);
+const packs = {};
+const codeOf = (r) => { const m = String(r.url || '').match(/\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/); return m ? m[1] : ''; };
+function fillCapa(img, r) {
+  const c = codeOf(r); if (!img || !c) return;
+  if (!PACKS.has(r.perfil)) { img.src = `capas/${c}.jpg`; return; }
+  packs[r.perfil] = packs[r.perfil] || fetch(`capas/pack-${r.perfil}.json`).then((x) => (x.ok ? x.json() : {})).catch(() => ({}));
+  packs[r.perfil].then((p) => { if (p[c]) img.src = p[c]; else img.dispatchEvent(new Event('error')); });
+}
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const longDate = (d) => { const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${+m[3]} de ${MESES[+m[2] - 1]} de ${m[1]}` : ''; };
+const IG_ICONS = '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><svg viewBox="0 0 24 24"><path d="M20.5 11.5a8.5 8.5 0 1 1-3.4-6.8A8.4 8.4 0 0 1 20.5 11.5zM20.5 20.5l-2-4"/></svg><svg viewBox="0 0 24 24"><path d="M21 3 3 10l7 3 3 7z"/><path d="M10 13l5-5"/></svg><svg class="sv" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-5-6 5z"/></svg>';
+function pvEl() { let el = document.getElementById('ac-pv'); if (!el) { el = document.createElement('div'); el.id = 'ac-pv'; el.className = 'ac-pv'; el.hidden = true; document.body.appendChild(el); addEventListener('scroll', () => { el.hidden = true; }, { passive: true }); } return el; }
+function showPv(r, card) {
+  const pv = pvEl(), f = fmtOf(r), code = codeOf(r);
+  const kind = f === 'Reel' ? '▶ Reel' : f === 'Carrossel' ? 'Carrossel' : '';
+  pv.innerHTML = `<div class="ig-h"><div class="ig-av"><span>${esc((r.perfil || '?')[0].toUpperCase())}</span></div><div><b>${esc(r.perfil)}</b>${r.collab ? '<small>Collab</small>' : r.fixado ? '<small>Fixado</small>' : ''}</div><span class="ig-more">···</span></div>
+    <div class="ig-m">${code ? '<img alt="">' : '<div class="ph">Prévia indisponível</div>'}${kind ? `<span class="k">${kind}</span>` : ''}</div>
+    <div class="ig-a">${IG_ICONS}</div>
+    <div class="ig-c"><p><b>${esc(r.perfil)}</b> ${esc(r.trecho || '')}</p>${longDate(r.data) ? `<small>${longDate(r.data)}</small>` : ''}</div>`;
+  const img = pv.querySelector('img');
+  if (img) { img.onerror = () => img.replaceWith(Object.assign(document.createElement('div'), { className: 'ph', textContent: 'Prévia indisponível' })); img.onload = () => placePv(card); fillCapa(img, r); }
+  pv.hidden = false; placePv(card);
+}
+function placePv(card) {
+  const pv = pvEl(); if (pv.hidden) return;
+  const rc = card.getBoundingClientRect(), w = pv.offsetWidth, h = pv.offsetHeight;
+  let x = rc.right + 12; if (x + w > innerWidth - 12) x = rc.left - w - 12; if (x < 12) x = Math.max(12, Math.min(innerWidth - w - 12, rc.left));
+  const y = Math.min(Math.max(12, rc.top), innerHeight - h - 12);
+  pv.style.left = `${x}px`; pv.style.top = `${Math.max(12, y)}px`;
+}
+const hidePv = () => { const el = document.getElementById('ac-pv'); if (el) el.hidden = true; };
+
 function rowsWithEdits() { const e = edits(); return A.rows.map((r) => (e[r.id] ? { ...r, ...e[r.id] } : r)); }
 
 export function renderAcervo(root, ctx) {
@@ -173,6 +207,7 @@ export function renderAcervo(root, ctx) {
     <p class="small muted" style="margin-top:16px">Cópia de 16/11/2026 do Acervo. Novos posts continuam entrando pelo <a href="${ACERVO_URL}" target="_blank" rel="noopener">artifact do Acervo</a> até a versão real.</p>
     ${open ? `<div class="scrim" data-close="1"></div><aside class="drawer" role="dialog" aria-label="Detalhes do post">
       <button class="btn btn-ghost btn-sm" data-close="1" style="align-self:flex-end">Fechar</button>
+      ${codeOf(open) ? `<a href="${esc(safeUrl(open.url))}" target="_blank" rel="noopener"><img class="dr-img" alt="Capa do post"></a>` : ''}
       <span class="ac-top"><span class="ac-fmt"><span class="fdot f-${fmtOf(open)}"></span>${esc(fmtOf(open))}</span><span class="ac-date">@${esc(open.perfil)}${open.data ? ` · ${dt(open.data)}` : ''}</span></span>
       <h2 class="dr-title">${esc(open.resumo || 'Sem resumo')}</h2>
       ${open.trecho ? `<blockquote class="dr-quote">${esc(open.trecho)}</blockquote>` : ''}
@@ -195,6 +230,7 @@ export function renderAcervo(root, ctx) {
   root.onclick = (e) => {
     const b = e.target.closest('[data-open],[data-close],[data-fmt],[data-tema],[data-favonly],[data-fav],[data-more]');
     if (!b) return;
+    hidePv();
     if (b.dataset.open) A.open = b.dataset.open;
     else if (b.dataset.close) A.open = null;
     else if (b.dataset.fmt !== undefined) { A.fmt = b.dataset.fmt; A.limit = 60; }
@@ -204,6 +240,11 @@ export function renderAcervo(root, ctx) {
     else if (b.dataset.more) A.limit += 60;
     ctx.refresh();
   };
+  const di = root.querySelector('.dr-img'); if (di) { di.onerror = () => di.remove(); fillCapa(di, open); }
+  if (matchMedia('(hover: hover)').matches) {
+    root.onmouseover = (e) => { const c = e.target.closest('.ac-card'); if (!c || c.contains(e.relatedTarget)) return; const r = all.find((x) => x.id === c.dataset.open); if (r) showPv(r, c); };
+    root.onmouseout = (e) => { const c = e.target.closest('.ac-card'); if (c && !c.contains(e.relatedTarget)) hidePv(); };
+  }
   root.onchange = (e) => { if (e.target.dataset.a === 'perfil') { A.perfil = e.target.value; A.limit = 60; ctx.refresh(); } };
   root.oninput = (e) => {
     if (e.target.dataset.a !== 'q') return;

@@ -1,16 +1,16 @@
 // Roteador e moldura da plataforma: topo verde, abas, sub-abas e barra de baixo no celular.
 
-import { store } from './store.js?v=202611162334';
-import { icon, initials, installTooltips } from './ui.js?v=202611162334';
-import { destroyCharts } from './charts.js?v=202611162334';
-import { renderRegister, setRegisterDate } from './view-register.js?v=202611162334';
-import { renderStudentDashboard } from './view-dashboard.js?v=202611162334';
-import { renderRoster, renderMentorStudent } from './view-mentor.js?v=202611162334';
-import { renderHistory, renderSettings, renderLogin } from './view-other.js?v=202611162334';
-import { renderHome, renderLessons, renderLesson, renderGuide } from './view-platform.js?v=202611162334';
-import { renderTimeline, renderAdminTimeline } from './view-timeline.js?v=202611162334';
-import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js?v=202611162334';
-import { esc } from './util.js?v=202611162334';
+import { store } from './store.js?v=202611162357';
+import { icon, initials, installTooltips } from './ui.js?v=202611162357';
+import { destroyCharts } from './charts.js?v=202611162357';
+import { renderRegister, setRegisterDate } from './view-register.js?v=202611162357';
+import { renderStudentDashboard } from './view-dashboard.js?v=202611162357';
+import { renderRoster, renderMentorStudent } from './view-mentor.js?v=202611162357';
+import { renderHistory, renderSettings, renderLogin } from './view-other.js?v=202611162357';
+import { renderHome, renderLessons, renderLesson, renderGuide } from './view-platform.js?v=202611162357';
+import { renderTimeline, renderAdminTimeline } from './view-timeline.js?v=202611162357';
+import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js?v=202611162357';
+import { esc } from './util.js?v=202611162357';
 
 const $top = document.getElementById('top');
 const $nav = document.getElementById('nav');
@@ -91,6 +91,8 @@ function frame(real, me, page) {
 
 function render() {
   destroyCharts();
+  document.getElementById('ac-pv')?.setAttribute('hidden', '');
+  $main.onmouseover = $main.onmouseout = null;
   applyTheme();
   const real = store.realMe();
   const me = store.me();

@@ -1,10 +1,10 @@
 // Zona ANÁLISE: o painel. Serve para o aluno e, em modo leitura, para o mentor.
 
-import { analyze, PERIODS, MIN_N } from './analytics.js?v=202611162334';
-import { systemShort, subjectShort, mistakeById } from './lists.js?v=202611162334';
-import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, parse, monthShort } from './util.js?v=202611162334';
-import { icon, deltaHtml, STATUS_ICON } from './ui.js?v=202611162334';
-import { weeklyVolume, weeklyAccuracy, assessmentsChart } from './charts.js?v=202611162334';
+import { analyze, PERIODS, MIN_N } from './analytics.js?v=202611162357';
+import { systemShort, subjectShort, mistakeById } from './lists.js?v=202611162357';
+import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, parse, monthShort } from './util.js?v=202611162357';
+import { icon, deltaHtml, STATUS_ICON } from './ui.js?v=202611162357';
+import { weeklyVolume, weeklyAccuracy, assessmentsChart } from './charts.js?v=202611162357';
 
 export const dashState = { period: '28d', sysSort: 'worst', showTable: {} };
 

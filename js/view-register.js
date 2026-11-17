@@ -1,9 +1,9 @@
 // Zona VOCÊ PREENCHE: registro rápido do dia.
 
-import { store } from './store.js?v=202611162334';
-import { SYSTEMS, SUBJECTS, BANKS, MODES, MISTAKES, ASSESSMENTS, MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162334';
-import { today, addDays, fmtDateLong, fmtDate, fmtPct, fmtInt, esc, sum, mondayOf, diffDays } from './util.js?v=202611162334';
-import { icon, toast } from './ui.js?v=202611162334';
+import { store } from './store.js?v=202611162357';
+import { SYSTEMS, SUBJECTS, BANKS, MODES, MISTAKES, ASSESSMENTS, MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162357';
+import { today, addDays, fmtDateLong, fmtDate, fmtPct, fmtInt, esc, sum, mondayOf, diffDays } from './util.js?v=202611162357';
+import { icon, toast } from './ui.js?v=202611162357';
 
 const S = {
   tab: 'dia',

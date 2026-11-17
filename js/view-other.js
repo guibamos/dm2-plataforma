@@ -1,9 +1,9 @@
 // Histórico, ajustes e tela de entrada.
 
-import { store } from './store.js?v=202611162334';
-import { MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162334';
-import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, addDays, sum, groupBy } from './util.js?v=202611162334';
-import { icon, toast, initials, examDateField } from './ui.js?v=202611162334';
+import { store } from './store.js?v=202611162357';
+import { MIXED, systemShort, subjectShort, mistakeById } from './lists.js?v=202611162357';
+import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, addDays, sum, groupBy } from './util.js?v=202611162357';
+import { icon, toast, initials, examDateField } from './ui.js?v=202611162357';
 
 const H = { days: 21 };
 

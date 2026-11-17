@@ -18,7 +18,7 @@ Desenho e decisões: [03-produto-e-oferta/plataforma-desenho-geral.md](../../03-
   - admin: modelo da mentoria, turma e ajuste por aluno.
 
   O exemplo isolado está em `timeline-exemplo.html`.
-- **Acervo dentro da plataforma:** os 542 posts do artifact Acervo DM2, copiados em 16/11/2026 para `data/acervo.json`. Tem busca, filtros por formato, perfil e tema, favoritos e notas, mas o que se edita aqui fica só no navegador. Sem as capas, porque o site é público e elas são prints de posts de outros perfis. Novos posts continuam entrando pelo artifact até a versão real.
+- **Acervo dentro da plataforma:** os 542 posts do artifact Acervo DM2, copiados em 16/11/2026 para `data/acervo.json`. Tem busca, filtros por formato, perfil e tema, favoritos e notas, mas o que se edita aqui fica só no navegador. Com as capas (pasta `capas/`) e a prévia no estilo de post do Instagram ao passar o mouse. Atenção: são prints de posts de outros perfis, e o site está público. Novos posts continuam entrando pelo artifact até a versão real.
 - **Botão Admin ⇄ Aluno** no topo: temporário, mostra a visão da aluna fictícia Ana Lima.
 - **Menu:** topo verde com tema claro/escuro e perfil, abas sublinhadas e pílulas suaves dentro de Acompanhamento. No celular, barra de baixo com Registrar no meio.
 

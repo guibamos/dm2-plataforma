@@ -1,8 +1,8 @@
 // Dados fictícios para a demonstração. Nenhum aluno aqui existe.
 // Cada perfil mostra uma situação que o mentor precisa enxergar no painel.
 
-import { SYSTEMS, SUBJECTS, MISTAKES, ASSESSMENTS, MIXED } from './lists.js?v=202611162334';
-import { today, addDays, mondayOf, rng, uid } from './util.js?v=202611162334';
+import { SYSTEMS, SUBJECTS, MISTAKES, ASSESSMENTS, MIXED } from './lists.js?v=202611162357';
+import { today, addDays, mondayOf, rng, uid } from './util.js?v=202611162357';
 
 const PROFILES = [
   { id: 'ana', name: 'Ana Lima', exam: 'Step 1', weeks: 9, examIn: 95, base: 0.58, trend: 0.012, perDay: 40, skip: 0.06, anki: 0.95,
