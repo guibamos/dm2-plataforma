@@ -1,10 +1,10 @@
 // Áreas só do admin: Alunos (lista, grupos e cadastro), CRM, Acervo e Configurações.
 
-import { store } from './store.js';
-import { analyze } from './analytics.js';
-import { ACERVO_URL } from './content.js';
-import { fmtPct, fmtInt, fmtDate, esc } from './util.js';
-import { icon, statusChip, initials, toast, examDateField } from './ui.js';
+import { store } from './store.js?v=202611162315';
+import { analyze } from './analytics.js?v=202611162315';
+import { ACERVO_URL } from './content.js?v=202611162315';
+import { fmtPct, fmtInt, fmtDate, esc } from './util.js?v=202611162315';
+import { icon, statusChip, initials, toast, examDateField } from './ui.js?v=202611162315';
 
 const F = { q: '', exam: '', view: 'lista', group: 'exam', adding: false };
 const noHandlers = (root) => { root.onclick = root.oninput = root.onchange = root.onsubmit = null; };

@@ -1,10 +1,10 @@
 // Visão dos mentores: todos os alunos e o painel de cada um (só leitura).
 
-import { store } from './store.js';
-import { analyze } from './analytics.js';
-import { fmtPct, fmtInt, fmtDate, esc, today, addDays, diffDays } from './util.js';
-import { icon, statusChip, initials, deltaHtml, toast } from './ui.js';
-import { dashboardBody, periodFilter, mountCharts, handleDashClick } from './view-dashboard.js';
+import { store } from './store.js?v=202611162315';
+import { analyze } from './analytics.js?v=202611162315';
+import { fmtPct, fmtInt, fmtDate, esc, today, addDays, diffDays } from './util.js?v=202611162315';
+import { icon, statusChip, initials, deltaHtml, toast } from './ui.js?v=202611162315';
+import { dashboardBody, periodFilter, mountCharts, handleDashClick } from './view-dashboard.js?v=202611162315';
 
 const ORDER = { critical: 0, serious: 1, warning: 2, good: 3 };
 

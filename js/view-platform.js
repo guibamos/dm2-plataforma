@@ -1,11 +1,11 @@
 // Áreas novas da plataforma: Início, Aulas, Timeline e Guias.
 // O admin vê as mesmas páginas de Aulas e Guia, com o botão Editar.
 
-import { store } from './store.js';
-import { analyze } from './analytics.js';
-import { GUIDES, PRICES, CHECKED } from './guides.js';
-import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, diffDays } from './util.js';
-import { icon, toast } from './ui.js';
+import { store } from './store.js?v=202611162315';
+import { analyze } from './analytics.js?v=202611162315';
+import { GUIDES, PRICES, CHECKED } from './guides.js?v=202611162315';
+import { fmtPct, fmtInt, fmtDate, fmtDateLong, esc, today, diffDays } from './util.js?v=202611162315';
+import { icon, toast } from './ui.js?v=202611162315';
 
 const noHandlers = (root) => { root.onclick = root.oninput = root.onchange = root.onsubmit = null; };
 const draft = (txt) => `<span class="draft">${icon('info')} ${txt}</span>`;

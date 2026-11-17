@@ -1,15 +1,15 @@
 // Roteador e moldura da plataforma: topo verde, abas, sub-abas e barra de baixo no celular.
 
-import { store } from './store.js';
-import { icon, initials, installTooltips } from './ui.js';
-import { destroyCharts } from './charts.js';
-import { renderRegister, setRegisterDate } from './view-register.js';
-import { renderStudentDashboard } from './view-dashboard.js';
-import { renderRoster, renderMentorStudent } from './view-mentor.js';
-import { renderHistory, renderSettings, renderLogin } from './view-other.js';
-import { renderHome, renderLessons, renderLesson, renderTimeline, renderGuide } from './view-platform.js';
-import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js';
-import { esc } from './util.js';
+import { store } from './store.js?v=202611162315';
+import { icon, initials, installTooltips } from './ui.js?v=202611162315';
+import { destroyCharts } from './charts.js?v=202611162315';
+import { renderRegister, setRegisterDate } from './view-register.js?v=202611162315';
+import { renderStudentDashboard } from './view-dashboard.js?v=202611162315';
+import { renderRoster, renderMentorStudent } from './view-mentor.js?v=202611162315';
+import { renderHistory, renderSettings, renderLogin } from './view-other.js?v=202611162315';
+import { renderHome, renderLessons, renderLesson, renderTimeline, renderGuide } from './view-platform.js?v=202611162315';
+import { renderStudents, renderCrm, renderAcervo, renderConfig } from './view-admin.js?v=202611162315';
+import { esc } from './util.js?v=202611162315';
 
 const $top = document.getElementById('top');
 const $nav = document.getElementById('nav');

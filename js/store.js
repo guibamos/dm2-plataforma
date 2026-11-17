@@ -4,9 +4,9 @@
 //   - aluno lê e grava só os próprios registros;
 //   - mentor lê os registros dos alunos dele e grava só as notas de mentoria.
 
-import { uid, today } from './util.js';
-import { buildSeed } from './seed.js';
-import { MODULES_SEED, WATCHED_SEED } from './content.js';
+import { uid, today } from './util.js?v=202611162315';
+import { buildSeed } from './seed.js?v=202611162315';
+import { MODULES_SEED, WATCHED_SEED } from './content.js?v=202611162315';
 
 const KEY = 'dm2-plataforma-v3';
 const VIEWAS = 'dm2-viewas';
